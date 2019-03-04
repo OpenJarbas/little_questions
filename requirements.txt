@@ -1,0 +1,6 @@
+gensim
+numpy
+scikit-learn
+pandas
+spacy
+padaos

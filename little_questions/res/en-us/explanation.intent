@@ -1,0 +1,3 @@
+# questions that aim to explain a statement, usually WHY questions
+why (is|are|were|was|did|does|do|doesn't) {statement}
+how (was|did|does) {statement}

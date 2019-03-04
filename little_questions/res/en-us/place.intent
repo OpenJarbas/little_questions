@@ -1,0 +1,5 @@
+# questions to determine a location
+(where|what city|what location|what place|what state|what u.s. state|what country) {thing} (is|was|were|are|did|does|do) {property}
+(where|what city|what location|what place|what state|what u.s. state|what country) (is|are|were|was|did|does|do) {thing} (happen|located|occur)
+(where's|where|what city|what location|what place|what state|what u.s. state|what country) {thing}
+(where|what city|what location|what place|what state|what u.s. state|what country) (is|are|were|was|did|does|do) {thing}

@@ -1,0 +1,4 @@
+# questions to determine if something is possible/can execute an action
+can (you|it|she|he|they|i|this|these|those) {hability}
+possible to {hability}
+(can|could) {thing} (be|do|the) {hability}
