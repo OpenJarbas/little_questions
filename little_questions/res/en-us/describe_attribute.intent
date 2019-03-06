@@ -1,4 +1,4 @@
 # questions that want a description of a property of something
 how {property} is {thing}
-(what|what's) {property} (did|were|in|as|on|for|does) {thing}
-(what|what's) (is|are|were|was|did|does|do) {property} of {thing}
+(what|what's|what 's) {property} (did|were|in|as|on|for|does) {thing}
+(what|what's|what' s) (is|are|were|was|did|does|do) {property} of {thing}

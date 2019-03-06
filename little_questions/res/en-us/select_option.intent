@@ -1,6 +1,6 @@
 # questions that imply multiple choice
 which {option}
 {option} which {property}
-in what {option}
+(in|on) what {option}
 what {option} (has|is) {property}
 {option} (are|is) {property} of what
