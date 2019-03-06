@@ -1,11 +1,14 @@
 from little_questions.settings import AFFIRMATIONS, nlp
 from little_questions.parsers import BasicQuestionParser
 from little_questions.features import featurize
+from little_questions.utils.word_vectors import WordTwoVec
+
 import random
 
 
 class Question(object):
     parser = BasicQuestionParser()
+    vector_model = None#WordTwoVec()
 
     def __init__(self, text, main_type="unknown", secondary_type="unknown"):
         self.text = text
@@ -26,14 +29,13 @@ class Question(object):
             self._parsed = s_feature
         return s_feature
 
+    @property
+    def word_vector(self):
+        return self.vector_model.embed(self.text)
+
+    @property
     def features(self):
         return featurize(self.text)
-
-    def set_main_type(self, main_type):
-        self._main_type = main_type
-
-    def set_secondary_type(self, secondary_type):
-        self._secondary_type = secondary_type
 
     def add_answer(self, answer):
         if answer not in self._answers:
@@ -82,3 +84,4 @@ if __name__ == "__main__":
     for q in questions:
         question = Question(q)
         pprint(question.parse_data)
+        print(question.word_vector)
