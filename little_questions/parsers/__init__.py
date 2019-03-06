@@ -70,10 +70,10 @@ class BasicQuestionParser(object):
         utterance = normalize(str(utterance)).lower()
         data = {"Question": utterance}
 
-        COMMON_STARTERS = ["on average"]
+        COMMON_STARTERS = ["on average", "about", "tell me", "approximately"]
         for c in COMMON_STARTERS:
             if utterance.startswith(c):
-                utterance = utterance.replace(c, "")
+                utterance = utterance.replace(c, "").strip()
         utterance = " ".join(utterance.split(" "))
 
         match = self.container.calc_intent(utterance)

@@ -1,3 +1,2 @@
-# questions about something at a certain time
-when {time} what {thing}
-what {thing} during {time}
+# questions about some property at a certain time
+how {property} (should|was) {thing} (when|during) {time}

@@ -40,10 +40,9 @@ def cosine_similarity(v1: np.ndarray, v2: np.ndarray) -> float:
 
 class WordTwoVec(object):
     """
-    a wrapper for gensim.Word2Vec with added functionality to embed phrases and compute the
-    "goodness" of a question-answer pair based on embedding-vector similarity
+    a wrapper for gensim.Word2Vec with added functionality to embed phrases
     """
-
+    # TODO default to Glove?
     def __init__(self, model_file=join(MODELS_PATH, 'question2vec.bin')):
         if model_file and isfile(model_file):
             self.model = Word2Vec.load(model_file)
@@ -82,7 +81,7 @@ def train_question_vectors(questions_path=join(DATA_PATH, "questions.txt"),
                            model_path=join(MODELS_PATH, 'question2vec.bin')):
     # train model
     with open(questions_path) as f:
-        sentences = [s.split(" ") for s in f.readlines()]
+        sentences = [s.split(" ")[1:] for s in f.readlines()]
     model = Word2Vec(sentences, min_count=1)
     # save model
     model.save(model_path)

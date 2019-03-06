@@ -1,0 +1,3 @@
+# question about an entity in relation to a place
+who {entity} ( from | in | on | at ) {location}
+( from | in | on | at ) {location} who {entity}
