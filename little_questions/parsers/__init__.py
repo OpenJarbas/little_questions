@@ -63,9 +63,6 @@ class BasicQuestionParser(object):
                 with open(join(folder_path, f)) as fi:
                     rules = fi.readlines()
                 rules = [r.strip() for r in rules if r and not r.startswith("#")]
-                rules = [r.replace("(", "( ") for r in rules]
-                rules = [r.replace(")", " )") for r in rules]
-                rules = [r.replace("|", " | ") for r in rules]
                 self.register_intent(intent, rules)
 
     def parse(self, utterance):
