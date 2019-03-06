@@ -4,6 +4,19 @@ Classify and Parse questions
 
 ## Parsing
 
+Questions are classified as one of these intents
+
+    ['example', 'relate_time_and_thing', 'confirm_location', 'select_option', 
+    'step_by_step', 'query_past_action', 'distance', 'age', 'describe_attribute', 
+    'confirm', 'query_action', 'explanation', 'retrieve_information', 
+    'causal_attribute', 'relate_time_and_place', 'quantity', 'responsible_entity', 
+    'duration', 'place', 'defend', 'common_attributes', 'relate_to_entity', 
+    'hability_check', 'relate_place_and_thing', 'relate_attributes', 
+    'property_check', 'advice', 'time', 'unique_attributes', 'assign_entity']
+
+
+Usage
+
 
 ```python
 from little_questions.parsers import BasicQuestionParser
@@ -27,144 +40,89 @@ for q in questions:
 
 sample output
 
-        Q: what is nebraska 's most valuable resource ?
+        Q: what was the bridge of san luis rey made of ?
+
+        Intent: describe_attribute
+        {'Question': 'what was bridge of san luis rey made of ?',
+         'QuestionIntent': 'describe_attribute',
+         'property': 'bridge',
+         'thing': 'san luis rey made of'}
+        ___
+        Q: is this for electric stoves ?
+        
+        Intent: confirm
+        {'Question': 'is this for electric stoves ?',
+         'QuestionIntent': 'confirm',
+         'statement': 'for electric stoves'}
+        ___
+        Q: what college produced the most winning super bowl quarterbacks ?
         
         Intent: retrieve_information
-        {'Question': "what is nebraska's most valuable resource",
+        {'Question': 'what college produced most winning super bowl quarterbacks ?',
          'QuestionIntent': 'retrieve_information',
-         'thing': "nebraska's most valuable resource"}
+         'thing': 'college produced most winning super bowl quarterbacks'}
         ___
-        Q: who led the opposition when konrad adenauer was chancellor in germany ?
+        Q: can more than one water source be tested ?
+        
+        Intent: hability_check
+        {'Question': 'can more than one water source be tested ?',
+         'QuestionIntent': 'hability_check',
+         'hability': 'tested',
+         'thing': 'more than one water source'}
+        ___
+        Q: does this pick up dust without blowing it out the bag ?
+        
+        Intent: confirm
+        {'Question': 'does this pick up dust without blowing it out bag ?',
+         'QuestionIntent': 'confirm',
+         'statement': 'pick up dust without blowing it out bag'}
+        ___
+        Q: who was the first jockey to ride two triple crown winners ?
         
         Intent: relate_to_entity
-        {'Question': 'who led the opposition when konrad adenauer was chancellor in '
-                     'germany',
+        {'Question': 'who was first jockey to ride two triple crown winners ?',
          'QuestionIntent': 'relate_to_entity',
-         'entity': 'led the oppositi',
-         'thing': 'when konrad adenauer was chancellor in germany'}
+         'entity': 'was first jockey',
+         'thing': 'ride two triple crown winners'}
         ___
-        Q: are these drip pans dishwasher safe ?
-        
-        Intent: confirm
-        {'Question': 'are these drip pans dishwasher safe',
-         'QuestionIntent': 'confirm',
-         'statement': 'drip pans dishwasher safe'}
-        ___
-        Q: when was hurricane hugo ?
-        
-        Intent: time
-        {'Question': 'when was hurricane hugo',
-         'QuestionIntent': 'time',
-         'thing': 'hurricane hugo'}
-        ___
-        Q: what 's the american dollar equivalent for 8 pounds in the u.k. ?
-        
-        Intent: describe_attribute
-        {'Question': "what's the american dollar equivalent for 8 pounds in the u.k.",
-         'QuestionIntent': 'describe_attribute',
-         'property': 's the american dollar equivalent',
-         'thing': '8 pounds in the u.k'}
-        ___
-        Q: does this test forlead ?
-        
-        Intent: confirm
-        {'Question': 'does this test forlead',
-         'QuestionIntent': 'confirm',
-         'statement': 'test forlead'}
-        ___
-        Q: what do you call a group of geese ?
-        
-        Intent: describe_attribute
-        {'Question': 'what do you call a group of geese',
-         'QuestionIntent': 'describe_attribute',
-         'property': 'you call a group',
-         'thing': 'geese'}
-        ___
-        Q: do they come in different sizes ?
-        
-        Intent: confirm
-        {'Question': 'do they come in different sizes',
-         'QuestionIntent': 'confirm',
-         'statement': 'come in different sizes'}
-        ___
-        Q: who was credited with saying : `` i never met a man i did n't like '' ?
+        Q: who seized power from milton obote in 1971 ?
         
         Intent: relate_to_entity
-        {'Question': "who was credited with saying :  i never met a man i did n't "
-                     "like''",
+        {'Question': 'who seized power from milton obote in 1971 ?',
          'QuestionIntent': 'relate_to_entity',
-         'entity': 'was credited',
-         'thing': "saying :  i never met a man i did n't like"}
+         'entity': 'seized power from milton obote',
+         'thing': '1971'}
         ___
-        Q: whom did the chicago bulls beat in the 1993 championship ?
+        Q: who is terrence malick ?
         
-        Intent: responsible_entity
-        {'Question': 'whom did the chicago bulls beat in the 1993 championship',
-         'QuestionIntent': 'responsible_entity',
-         'thing': 'did the chicago bulls beat in the 1993 championship'}
+        Intent: assign_entity
+        {'Question': 'who is terrence malick ?',
+         'QuestionIntent': 'assign_entity',
+         'statement': 'is terrence malick'}
         ___
-        Q: what is `` the bear of beers '' ?
+        Q: what are the 7 articles of the constitution ?
         
         Intent: describe_attribute
-        {'Question': "what is  the bear of beers''",
+        {'Question': 'what are 7 articles of constitution ?',
          'QuestionIntent': 'describe_attribute',
-         'property': 'the bear',
-         'thing': 'beers'}
+         'property': '7 articles',
+         'thing': 'constitution'}
         ___
-        Q: how can you contact play producers and promoters on-line ?
+        Q: how is the election of a new pope announced to the world ?
         
         Intent: step_by_step
-        {'Question': 'how can you contact play producers and promoters on-line',
+        {'Question': 'how is election of new pope announced to world ?',
          'QuestionIntent': 'step_by_step',
-         'query': 'contact play producers and promoters on-line'}
+         'query': 'election new pope announced world'}
         ___
-        Q: what is color ?
+        Q: name the largest country in south america .
         
-        Intent: retrieve_information
-        {'Question': 'what is color',
-         'QuestionIntent': 'retrieve_information',
-         'thing': 'color'}
+        Intent: example
+        {'Question': 'name largest country in south america .',
+         'QuestionIntent': 'example',
+         'thing': 'largest country in south america'}
         ___
-        Q: what city boasts penn 's landing , on the banks of the delaware river ?
-        
-        Intent: place
-        {'Question': "what city boasts penn's landing  on the banks of the delaware "
-                     'river',
-         'QuestionIntent': 'place',
-         'property': 'river',
-         'thing': "boasts penn's landing  on the banks of the delaw"}
-        ___
-        Q: what countries have the largest areas of forest ?
-        
-        Intent: relate_attributes
-        {'Question': 'what countries have the largest areas of forest',
-         'QuestionIntent': 'relate_attributes',
-         'property': 'forest',
-         'thing': 'countries have the largest areas'}
-        ___
-        Q: what is eagle 's syndrome styloid process ?
-        
-        Intent: retrieve_information
-        {'Question': "what is eagle's syndrome styloid process",
-         'QuestionIntent': 'retrieve_information',
-         'thing': "eagle's syndrome styloid process"}
-        ___
-        Q: what does the name shawn mean ?
-        
-        Intent: retrieve_information
-        {'Question': 'what does the name shawn mean',
-         'QuestionIntent': 'retrieve_information',
-         'thing': 'the name shawn mean'}
-        ___
-        Q: what `` magic '' does mandrake employ ?
-        
-        Intent: describe_attribute
-        {'Question': "what  magic'' does mandrake employ",
-         'QuestionIntent': 'describe_attribute',
-         'property': 'magic',
-         'thing': 'mandrake employ'}
-        ___
-        
+                
         
 ## Classification
 

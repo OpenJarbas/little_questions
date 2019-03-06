@@ -70,15 +70,17 @@ class BasicQuestionParser(object):
 
     def parse(self, utterance):
         # normalization pre-parsing
-        utterance = str(utterance).lower()\
-            .replace("`", "").replace(" '", "'").replace(",", "").replace(
-            "?", "").strip()
-        if utterance.startswith("on average"):
-            utterance = utterance.replace("on average", "")
+        utterance = normalize(str(utterance)).lower()
+        data = {"Question": utterance}
+
+        COMMON_STARTERS = ["on average"]
+        for c in COMMON_STARTERS:
+            if utterance.startswith(c):
+                utterance = utterance.replace(c, "")
         utterance = " ".join(utterance.split(" "))
 
         match = self.container.calc_intent(utterance)
-        data = {"Question": utterance}
+
         data["QuestionIntent"] = match["name"] or "unknown"
         entities = match["entities"]
         data.update(entities)
