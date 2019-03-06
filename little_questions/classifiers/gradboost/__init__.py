@@ -119,5 +119,8 @@ if __name__ == "__main__":
                  "did you know that dogs are animals",
                  "do you agree that dogs are animals",
                  "not a question"]
-    predictor = Test(questions)
-    predictor.predict()
+    predictor = Test()
+    for q in questions:
+        print(predictor.predict(q))
+
+    # TODO test data set
