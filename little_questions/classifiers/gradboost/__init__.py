@@ -40,12 +40,12 @@ class TrainModel(object):
         spec_features = dict_vect.transform(special_features)
         tfidf_features = tfidf_vect.transform(self.sents).toarray()
         # Merge 2 feature vectors
-        self.X = np.concatenate((spec_features, tfidf_features), axis=1)
+        return np.concatenate((spec_features, tfidf_features), axis=1)
 
     def train(self):
         # Extract Features
         print('Extracting Features')
-        self.feature_extraction()
+        X = self.feature_extraction()
         # Pre Processing
         print('Encoding Labels')
         lencoder = self.label_encoder()
@@ -55,7 +55,7 @@ class TrainModel(object):
             random_state=42)  # Life Universe and Everything
         y = lencoder.transform(self.cat)
 
-        model.fit(self.X, y)
+        model.fit(X, y)
         print('Training Complete, dumping model to models directory')
         joblib.dump(model, join(MODELS_PATH, 'GradientBoostingClassifier.pkl'))
 
@@ -93,7 +93,7 @@ class Test(object):
 
 
 if __name__ == "__main__":
-    train = False
+    train = True
     if train:
         model = TrainModel()
         model.train()

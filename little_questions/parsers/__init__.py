@@ -1,6 +1,6 @@
 from padaos import IntentContainer
 from little_questions.utils import normalize
-from little_questions.settings import RESOURCES_PATH, nlp
+from little_questions.settings import RESOURCES_PATH
 from os import listdir
 from os.path import join, isdir
 

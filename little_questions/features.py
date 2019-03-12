@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.preprocessing import LabelEncoder
 from os.path import join, exists
 from little_questions.settings import MODELS_PATH, DATA_PATH, nlp, AFFIRMATIONS
 import json
@@ -10,8 +11,24 @@ from pprint import pprint
 
 _parser = BasicQuestionParser()
 
+# categories = parse_labels()
+categories = ['ABBR:abb', 'ABBR:exp', 'DESC:def', 'DESC:desc', 'DESC:manner',
+              'DESC:reason', 'ENTY:animal', 'ENTY:body', 'ENTY:color',
+              'ENTY:cremat', 'ENTY:currency', 'ENTY:dismed', 'ENTY:event',
+              'ENTY:food', 'ENTY:instru', 'ENTY:lang', 'ENTY:letter',
+              'ENTY:other', 'ENTY:plant', 'ENTY:product', 'ENTY:religion',
+              'ENTY:sport', 'ENTY:substance', 'ENTY:symbol', 'ENTY:techmeth',
+              'ENTY:termeq', 'ENTY:veh', 'ENTY:word', 'HUM:desc', 'HUM:gr',
+              'HUM:ind', 'HUM:title', 'LOC:city', 'LOC:country', 'LOC:mount',
+              'LOC:other', 'LOC:state', 'NUM:code', 'NUM:count', 'NUM:date',
+              'NUM:dist', 'NUM:money', 'NUM:ord', 'NUM:other', 'NUM:perc',
+              'NUM:period', 'NUM:speed', 'NUM:temp', 'NUM:volsize',
+              'NUM:weight']
+label_encoder = LabelEncoder()
+label_encoder.fit(categories)
 
-def _parse(text, debug=True):
+
+def _parse(text, debug=False):
     global _parser
     dict_feats = _parser.parse(text)
     text = nlp(text)
@@ -29,7 +46,7 @@ def _parse(text, debug=True):
         break
     s_feature.update(dict_feats)
 
-    if debug:
+    if debug or s_feature['QuestionIntent'] == "unknown":
         print("Q:", text)
         print("Intent:", s_feature['QuestionIntent'])
         pprint(s_feature)
