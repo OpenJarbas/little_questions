@@ -13,3 +13,5 @@ AFFIRMATIONS = ["do", "would", "it's", "is", "will", "does", "can", "has",
 MODELS_PATH = join(dirname(__file__), "models")
 DATA_PATH = join(dirname(__file__), "data")
 RESOURCES_PATH = join(dirname(__file__), "res")
+
+DEFAULT_CLASSIFIER = join(MODELS_PATH, "sgd_model.pkl")

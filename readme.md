@@ -126,5 +126,35 @@ sample output
         
 ## Classification
 
-TODO http://cogcomp.org/Data/QA/QC/
+Training classifiers with [this data](http://cogcomp.org/Data/QA/QC/)
 
+Still experimenting and finetuning parameters, consider this unstable
+
+* SGD - Accuracy: 0.752 
+* Logistic Regression - Accuracy: 0.7
+* Naive Bayes - Accuracy: 0.518
+
+Best model will always be used for DEFAULT_CLASSIFIER
+
+```python
+from little_questions.classifiers import QuestionClassifier
+from little_questions.settings import DEFAULT_CLASSIFIER
+
+classifier = QuestionClassifier().load(DEFAULT_CLASSIFIER)
+question = "who made you"
+preds = classifier.predict([question])
+assert preds[0] == "HUM:ind"
+```
+
+You can also test specific classifiers
+
+```python
+from little_questions.classifiers.logreg import LogRegQuestionClassifier
+classifier = LogRegQuestionClassifier().load()
+
+from little_questions.classifiers.naive import NaiveQuestionClassifier
+classifier = NaiveQuestionClassifier().load()
+
+from little_questions.classifiers.sgd import SGDQuestionClassifier
+classifier = SGDQuestionClassifier().load()
+```

@@ -1,5 +1,5 @@
 numpy
 scikit-learn
 spacy
-git+https://github.com/MycroftAI/padaos@bugfix/space-issue
-gensim
+padaos
+#gensim

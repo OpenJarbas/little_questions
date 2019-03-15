@@ -1,21 +1,20 @@
-from little_questions.settings import AFFIRMATIONS, nlp
+from little_questions.settings import DEFAULT_CLASSIFIER
 from little_questions.parsers import BasicQuestionParser
-from little_questions.features import featurize
-from little_questions.utils.word_vectors import WordTwoVec
-
+#from little_questions.utils.word_vectors import WordTwoVec
+from little_questions.classifiers import QuestionClassifier
 import random
 
 
 class Question(object):
     parser = BasicQuestionParser()
     vector_model = None#WordTwoVec()
+    classifier = QuestionClassifier().load(DEFAULT_CLASSIFIER)
 
-    def __init__(self, text, main_type="unknown", secondary_type="unknown"):
+    def __init__(self, text):
         self.text = text
-        self._main_type = main_type
-        self._secondary_type = secondary_type
         self._answers = []
         self._parsed = None
+        self._classification = self.classifier.predict([text])[0]
 
     @property
     def parse_data(self):
@@ -31,11 +30,8 @@ class Question(object):
 
     @property
     def word_vector(self):
+        raise NotImplementedError("Work in Progress")
         return self.vector_model.embed(self.text)
-
-    @property
-    def features(self):
-        return featurize(self.text)
 
     def add_answer(self, answer):
         if answer not in self._answers:
@@ -43,11 +39,11 @@ class Question(object):
 
     @property
     def main_type(self):
-        return self._main_type
+        return self._classification.split(":")[0]
 
     @property
     def secondary_type(self):
-        return self._secondary_type
+        return self._classification.split(":")[1]
 
     @property
     def answer(self):
@@ -79,9 +75,10 @@ if __name__ == "__main__":
                  "whose dog is this",
                  "did you know that dogs are animals",
                  "do you agree that dogs are animals",
-                 "not a question"]
+                 "not a question",
+                 "who made you"]
 
     for q in questions:
         question = Question(q)
         pprint(question.parse_data)
-        print(question.word_vector)
+        print(question.main_type, question.secondary_type)
