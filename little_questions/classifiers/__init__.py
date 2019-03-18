@@ -3,7 +3,8 @@ from little_questions.classifiers.preprocess import normalize
 from sklearn.externals import joblib
 from sklearn.pipeline import Pipeline
 from os.path import join
-from little_questions.settings import MODELS_PATH, DATA_PATH, nlp, AFFIRMATIONS
+from little_questions.settings import MODELS_PATH, DATA_PATH, nlp, \
+    AFFIRMATIONS, DEFAULT_CLASSIFIER, DEFAULT_SIMPLE_CLASSIFIER
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, \
     classification_report, confusion_matrix
@@ -48,8 +49,8 @@ class DictTransformer:
 
 
 class QuestionClassifier(object):
-    def __init__(self, name="default"):
-        self.name = name
+    def __init__(self, name=DEFAULT_CLASSIFIER):
+        self.name = name.replace('_model.pkl', "")
         self.text_clf = None
 
     def train(self, train_data, target_data):
@@ -94,7 +95,9 @@ class QuestionClassifier(object):
                 label = line.split(" ")[0]
                 question = " ".join(line.split(" ")[1:])
                 train_data.append(question.strip())
-                target_data.append(label.strip())
+                # target_data.append(label.strip())
+                target_data.append(label.strip().split(":")[0])  # main
+                # target_data.append(label.strip().split(":")[1]) # secondary
         return train_data, target_data
 
     def load_test_data(self, filename=join(DATA_PATH, "questions_test.txt")):
@@ -120,3 +123,22 @@ class QuestionClassifier(object):
         print("best_score", gs_clf.best_score_)
         print("best_params", gs_clf.best_params_)
         return gs_clf
+
+
+class SimpleQuestionClassifier(QuestionClassifier):
+    def __init__(self, name=DEFAULT_SIMPLE_CLASSIFIER):
+        super().__init__(name)
+
+if __name__ == "__main__":
+    from little_questions.classifiers import QuestionClassifier
+    from little_questions.classifiers import SimpleQuestionClassifier
+
+    classifier = QuestionClassifier().load()
+    question = "who made you"
+    preds = classifier.predict([question])
+    assert preds[0] == "HUM:ind"
+
+    classifier = SimpleQuestionClassifier().load()
+    question = "who made you"
+    preds = classifier.predict([question])
+    assert preds[0] == "HUM"

@@ -31,6 +31,9 @@ class NaiveQuestionClassifier(QuestionClassifier):
                 'clf__fit_prior': (True, False)}
 
 
+class SimpleNaiveQuestionClassifier(NaiveQuestionClassifier):
+    def __init__(self, name="naive_main"):
+        super().__init__(name)
 
 if __name__ == '__main__':
     train = True
@@ -41,8 +44,6 @@ if __name__ == '__main__':
         clf.save()
     else:
         clf.load()
-        #clf.load("/home/user/PycharmProjects/question_parser"
-        #         "/little_questions/models/naive_no_dict_model.pkl")
     # model performance
     # curacy: 0.518
     # Accuracy: Accuracy: 0.514

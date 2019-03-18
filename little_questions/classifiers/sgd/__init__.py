@@ -38,8 +38,12 @@ class SGDQuestionClassifier(QuestionClassifier):
                 'clf__fit_intercept': (True, False)}
 
 
+class SimpleSGDQuestionClassifier(SGDQuestionClassifier):
+    def __init__(self, name="sgd_main"):
+        super().__init__(name)
+
 if __name__ == '__main__':
-    train = False
+    train = True
     clf = SGDQuestionClassifier()
     if train:
         t, tt = clf.load_data()

@@ -28,24 +28,30 @@ class LogRegQuestionClassifier(QuestionClassifier):
     def parameters(self):
         return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
                 'features__text__tfidf__use_idf': (True, False),
-                'clf__warm_start': (True, False), 
-                'clf__solver': ('newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+                'clf__warm_start': (True, False),
+                'clf__solver': (
+                    'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+
+
+class SimpleLogRegQuestionClassifier(LogRegQuestionClassifier):
+    def __init__(self, name="logreg_main"):
+        super().__init__(name)
 
 
 if __name__ == '__main__':
     train = False
-    search = True
+    search = False
     clf = LogRegQuestionClassifier()
     if search:
         t, tt = clf.load_data()
         clf.grid_search(t, tt)
     if train:
         t, tt = clf.load_data()
+
         clf.train(t, tt)
         clf.save()
     else:
         clf.load()
-        # clf.load("/home/user/PycharmProjects/question_parser/little_questions/models/logreg_no_dict_model.pkl")
     # model performance
     # Accuracy: 0.7 - normalize + dict + count + tfidf
     # Accuracy: 0.684 - dict + count + tfidf

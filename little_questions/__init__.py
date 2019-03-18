@@ -8,7 +8,7 @@ import random
 class Question(object):
     parser = BasicQuestionParser()
     vector_model = None#WordTwoVec()
-    classifier = QuestionClassifier().load(DEFAULT_CLASSIFIER)
+    classifier = QuestionClassifier().load()
 
     def __init__(self, text):
         self.text = text

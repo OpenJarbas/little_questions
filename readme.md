@@ -130,20 +130,35 @@ Training classifiers with [this data](http://cogcomp.org/Data/QA/QC/)
 
 Still experimenting and finetuning parameters, consider this unstable
 
+Classification of main label
+
+* Logistic Regression - Accuracy: 0.85
+* SGD - Accuracy: 0.826
+* Naive Bayes - Accuracy: 0.782
+
+Classification of main + secondary label
+
 * SGD - Accuracy: 0.752 
 * Logistic Regression - Accuracy: 0.7
 * Naive Bayes - Accuracy: 0.518
+
 
 Best model will always be used for DEFAULT_CLASSIFIER
 
 ```python
 from little_questions.classifiers import QuestionClassifier
-from little_questions.settings import DEFAULT_CLASSIFIER
+from little_questions.classifiers import SimpleQuestionClassifier
 
-classifier = QuestionClassifier().load(DEFAULT_CLASSIFIER)
+classifier = QuestionClassifier().load()
 question = "who made you"
 preds = classifier.predict([question])
 assert preds[0] == "HUM:ind"
+
+classifier = SimpleQuestionClassifier().load()
+question = "who made you"
+preds = classifier.predict([question])
+assert preds[0] == "HUM"
+
 ```
 
 You can also test specific classifiers

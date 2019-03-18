@@ -14,4 +14,5 @@ MODELS_PATH = join(dirname(__file__), "models")
 DATA_PATH = join(dirname(__file__), "data")
 RESOURCES_PATH = join(dirname(__file__), "res")
 
-DEFAULT_CLASSIFIER = join(MODELS_PATH, "sgd_model.pkl")
+DEFAULT_CLASSIFIER = "sgd_model.pkl"
+DEFAULT_SIMPLE_CLASSIFIER = "logreg_main_model.pkl"
