@@ -3,11 +3,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer
+    TextTransformer, SimpleQuestionClassifier
 from sklearn.feature_extraction import DictVectorizer
 
 
-class LogRegQuestionClassifier(QuestionClassifier):
+class LogRegQuestionClassifier(QuestionClassifier, SimpleQuestionClassifier):
     def __init__(self):
         super().__init__("logreg")
 

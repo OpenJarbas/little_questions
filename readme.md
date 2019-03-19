@@ -2,9 +2,31 @@
 
 Classify and Parse questions
 
+A decent question answering system needs to know what users are talking about
+
+- [Little Questions](#little-questions)
+  * [Parsing](#parsing)
+    + [Question Intent](#question-intent)
+      - [Sample output](#sample-output)
+  * [Classification](#classification)
+    + [Models](#models)
+    + [Taxonomy](#taxonomy)
+    
+    
 ## Parsing
 
-Questions are classified as one of these intents
+Questions are parsed using Padaos, a dead simple regex intent parser
+
+This is an early version, rules can be found and expanded [here](little_questions/res/en-us)
+
+Feel free to submit PRs, specially for new languages!
+
+### Question Intent
+
+Questions are classified as one of these intents, this will be fine tuned and improved over time
+
+Intents may disappear or be renamed at any time, wait until version 1.0 if 
+you are going to depend on this being static!
 
     ['example', 'relate_time_and_thing', 'confirm_location', 'select_option', 
     'step_by_step', 'query_past_action', 'distance', 'age', 'describe_attribute', 
@@ -13,10 +35,6 @@ Questions are classified as one of these intents
     'duration', 'place', 'defend', 'common_attributes', 'relate_to_entity', 
     'hability_check', 'relate_place_and_thing', 'relate_attributes', 
     'property_check', 'advice', 'time', 'unique_attributes', 'assign_entity']
-
-
-Usage
-
 
 ```python
 from little_questions.parsers import BasicQuestionParser
@@ -38,7 +56,7 @@ for q in questions:
     print("___")
 ```
 
-sample output
+#### Sample output
 
         Q: what was the bridge of san luis rey made of ?
 
@@ -128,22 +146,45 @@ sample output
 
 Training classifiers with [this data](http://cogcomp.org/Data/QA/QC/)
 
-Still experimenting and finetuning parameters, consider this unstable
+There are 6 main labels
+
+* ABBR - answer is an abbreviation
+* DESC - answer is a description of something
+* ENTY - answer is an entity/thing
+* HUM - answer is a human
+* LOC - answer is a location
+* NUM - answer is numeric
+
+### Models
+
+Still experimenting and fine tuning parameters and features, consider this 
+unstable
+
+My aim is to have the best model for each algorithm as a baseline, no 
+assumption is made about real world usage, you need to consider 
+speed/memory/performance trade offs and decide which classifier is best for you
 
 Classification of main label
 
+* Linear SVC - Accuracy: 0.868
+* Gradient Boosting - Accuracy: 0.858
+* Random Forest - Accuracy: 0.85
 * Logistic Regression - Accuracy: 0.85
 * SGD - Accuracy: 0.826
 * Naive Bayes - Accuracy: 0.782
 
 Classification of main + secondary label
 
+* Gradient Boosting - Accuracy: 0.786
+* Linear SVC - Accuracy: 0.782
 * SGD - Accuracy: 0.752 
+* Random Forest - Accuracy: 0.75
 * Logistic Regression - Accuracy: 0.7
 * Naive Bayes - Accuracy: 0.518
 
+NOTE: random forest models are almost 400MB, and not included in this repo
 
-Best model will always be used for DEFAULT_CLASSIFIER
+Best accuracy model will always be used for DEFAULT_CLASSIFIER
 
 ```python
 from little_questions.classifiers import QuestionClassifier
@@ -164,12 +205,115 @@ assert preds[0] == "HUM"
 You can also test specific classifiers
 
 ```python
+from little_questions.classifiers.gradboost import GradientBoostingQuestionClassifier
+classifier = GradientBoostingQuestionClassifier().load()
+
+from little_questions.classifiers.svm import SVCQuestionClassifier
+classifier = SVCQuestionClassifier().load()
+
 from little_questions.classifiers.logreg import LogRegQuestionClassifier
 classifier = LogRegQuestionClassifier().load()
+
+from little_questions.classifiers.sgd import SGDQuestionClassifier
+classifier = SGDQuestionClassifier().load()
+
+from little_questions.classifiers.forest import ForestQuestionClassifier
+# train the model
+train = True
+clf = ForestQuestionClassifier()
+if train:
+    t, tt = clf.load_data()
+    clf.train(t, tt)
+    clf.save()
+else:
+    clf.load()
 
 from little_questions.classifiers.naive import NaiveQuestionClassifier
 classifier = NaiveQuestionClassifier().load()
 
-from little_questions.classifiers.sgd import SGDQuestionClassifier
-classifier = SGDQuestionClassifier().load()
+
 ```
+
+
+###  Taxonomy
+
+Main labels are further specialized in secondary labels
+
+* ABBREVIATION	abbreviation
+
+
+      abb	        abbreviation
+      exp	        expression abbreviated
+  
+  
+* ENTITY	entities
+
+
+      animal	    animals
+      body	        organs of body
+      color	        colors
+      creative	    inventions, books and other creative pieces
+      currency	    currency names
+      dis.med.	    diseases and medicine
+      event	        events
+      food	        food
+      instrument	musical instrument
+      lang	        languages
+      letter	    letters like a-z
+      other	        other entities
+      plant	        plants
+      product	    products
+      religion	    religions
+      sport	        sports
+      substance	    elements and substances
+      symbol	    symbols and signs
+      technique	    techniques and methods
+      term	        equivalent terms
+      vehicle	    vehicles
+      word	        words with a special property
+  
+* DESCRIPTION	description and abstract concepts
+
+
+      definition	definition of sth.
+      description	description of sth.
+      manner	    manner of an action
+      reason	    reasons
+  
+  
+* HUMAN	human beings
+
+
+      group	        a group or organization of persons
+      ind	        an individual
+      title	        title of a person
+      description	description of a person
+      
+      
+* LOCATION	locations
+
+
+      city	        cities
+      country	    countries
+      mountain	    mountains
+      other	        other locations
+      state	        states
+  
+  
+* NUMERIC	numeric values
+
+
+      code	        postcodes or other codes
+      count	        number of sth.
+      date	        dates
+      distance	    linear measures
+      money	        prices
+      order	        ranks
+      other	        other numbers
+      period	    the lasting time of sth.
+      percent	    fractions
+      speed	        speed
+      temp	        temperature
+      size	        size, area and volume
+      weight	    weight
+      

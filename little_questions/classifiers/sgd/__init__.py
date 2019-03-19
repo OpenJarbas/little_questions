@@ -3,7 +3,7 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer
+    TextTransformer, SimpleQuestionClassifier
 from sklearn.feature_extraction import DictVectorizer
 
 
@@ -38,7 +38,7 @@ class SGDQuestionClassifier(QuestionClassifier):
                 'clf__fit_intercept': (True, False)}
 
 
-class SimpleSGDQuestionClassifier(SGDQuestionClassifier):
+class SimpleSGDQuestionClassifier(SGDQuestionClassifier, SimpleQuestionClassifier):
     def __init__(self, name="sgd_main"):
         super().__init__(name)
 

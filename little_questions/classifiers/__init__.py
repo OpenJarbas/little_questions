@@ -95,8 +95,8 @@ class QuestionClassifier(object):
                 label = line.split(" ")[0]
                 question = " ".join(line.split(" ")[1:])
                 train_data.append(question.strip())
-                # target_data.append(label.strip())
-                target_data.append(label.strip().split(":")[0])  # main
+                target_data.append(label.strip())
+                # target_data.append(label.strip().split(":")[0])  # main
                 # target_data.append(label.strip().split(":")[1]) # secondary
         return train_data, target_data
 
@@ -128,6 +128,17 @@ class QuestionClassifier(object):
 class SimpleQuestionClassifier(QuestionClassifier):
     def __init__(self, name=DEFAULT_SIMPLE_CLASSIFIER):
         super().__init__(name)
+
+    def load_data(self, filename=join(DATA_PATH, "questions.txt")):
+        train_data = []
+        target_data = []
+        with open(filename, 'r') as f:
+            for line in f:
+                label = line.split(" ")[0]
+                question = " ".join(line.split(" ")[1:])
+                train_data.append(question.strip())
+                target_data.append(label.strip().split(":")[0])  # main
+        return train_data, target_data
 
 if __name__ == "__main__":
     from little_questions.classifiers import QuestionClassifier
