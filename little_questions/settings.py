@@ -14,5 +14,5 @@ MODELS_PATH = join(dirname(__file__), "models")
 DATA_PATH = join(dirname(__file__), "data")
 RESOURCES_PATH = join(dirname(__file__), "res")
 
-DEFAULT_CLASSIFIER = "gradboost_model.pkl"
-DEFAULT_SIMPLE_CLASSIFIER = "linear_svc_main_model.pkl"
+DEFAULT_CLASSIFIER = "passive_agressive_model.pkl"
+DEFAULT_SIMPLE_CLASSIFIER = "passive_agressive_main_model.pkl"
