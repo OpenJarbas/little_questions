@@ -1,35 +1,33 @@
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from little_questions.classifiers import QuestionClassifier
+from little_questions.classifiers import QuestionClassifier,  \
+    SimpleQuestionClassifier
 
 
 class ForestQuestionClassifier(QuestionClassifier):
-    def __init__(self):
-        super().__init__("forest")
+    def __init__(self, name="forest"):
+        super().__init__(name)
 
-    def train(self, train_data, target_data, n_estimators=1000,
-              random_state=0):
-        self.text_clf = Pipeline([('vect', CountVectorizer()),
-                                  ('tfidf', TfidfTransformer()),
-                                  ('clf-forest', RandomForestClassifier(
-                                      n_estimators=n_estimators,
-                                      random_state=random_state)),
-                                  ])
-        self.text_clf = self.text_clf.fit(train_data, target_data)
-        return self.text_clf
+    @property
+    def classifier_class(self):
+        return RandomForestClassifier(n_estimators=200, random_state=42)
+
+
+class SimpleForestQuestionClassifier(ForestQuestionClassifier,
+                                     SimpleQuestionClassifier):
+    def __init__(self, name="forest_main"):
+        super().__init__(name)
+
 
 if __name__ == '__main__':
     train = True
-    clf = ForestQuestionClassifier()
+    clf = SimpleForestQuestionClassifier()
     if train:
         t, tt = clf.load_data()
         clf.train(t, tt)
         clf.save()
     else:
         clf.load()
-
+    clf.evaluate_model()
     questions = ["what do dogs and cats have in common",
                  "tell me about evil",
                  "how to kill animals ( a cow ) and make meat",

@@ -1,10 +1,6 @@
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer, SimpleQuestionClassifier
-from sklearn.feature_extraction import DictVectorizer
+from little_questions.classifiers import QuestionClassifier, \
+    SimpleQuestionClassifier
 
 
 class GradientBoostingQuestionClassifier(QuestionClassifier):
@@ -12,28 +8,14 @@ class GradientBoostingQuestionClassifier(QuestionClassifier):
         super().__init__(name)
 
     @property
-    def pipeline(self):
-        return [
-            ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
-            ('clf', GradientBoostingClassifier())
-        ]
-
-    @property
-    def parameters(self):
-        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__text__tfidf__use_idf': (True, False)}
+    def classifier_class(self):
+        return GradientBoostingClassifier()
 
 
-class SimpleGradientBoostingQuestionClassifier(GradientBoostingQuestionClassifier,
-                                  SimpleQuestionClassifier):
+class SimpleGradientBoostingQuestionClassifier(
+    GradientBoostingQuestionClassifier, SimpleQuestionClassifier):
     def __init__(self, name="gradboost_main"):
         super().__init__(name)
-
 
 
 if __name__ == '__main__':

@@ -1,10 +1,14 @@
-from little_questions.parsers import BasicQuestionParser
-from little_questions.classifiers.preprocess import normalize
-from sklearn.externals import joblib
-from sklearn.pipeline import Pipeline
 from os.path import join
+
 from little_questions.settings import MODELS_PATH, DATA_PATH, nlp, \
     AFFIRMATIONS, DEFAULT_CLASSIFIER, DEFAULT_SIMPLE_CLASSIFIER
+from little_questions.parsers import BasicQuestionParser
+from little_questions.classifiers.preprocess import normalize
+
+from sklearn.externals import joblib
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
+from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, \
     classification_report, confusion_matrix
@@ -60,6 +64,18 @@ class QuestionClassifier(object):
 
     @property
     def pipeline(self):
+        return [
+            ('features', FeatureUnion([
+                ('text', Pipeline([('norm', TextTransformer()),
+                                   ('vect', CountVectorizer()),
+                                   ('tfidf', TfidfTransformer())])),
+                ('intent', Pipeline([('dict', DictTransformer()),
+                                     ('dict_vec', DictVectorizer())]))])),
+            ('clf', self.classifier_class)
+        ]
+
+    @property
+    def classifier_class(self):
         raise NotImplementedError
 
     @property
@@ -107,22 +123,8 @@ class QuestionClassifier(object):
         X_test, y_test = self.load_test_data(path)
         preds = self.predict(X_test)
         print("Accuracy:", accuracy_score(y_test, preds))
-
-        try:
-            print("Precision:", precision_score(y_test, preds))
-        except:
-            pass
         print(classification_report(y_test, preds))
         return confusion_matrix(y_test, preds)
-
-    def grid_search(self, train_data, target_data):
-        parameters = {'vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                      'tfidf__use_idf': (True, False)}
-        gs_clf = GridSearchCV(self.text_clf, parameters, n_jobs=-1)
-        gs_clf = gs_clf.fit(train_data, target_data)
-        print("best_score", gs_clf.best_score_)
-        print("best_params", gs_clf.best_params_)
-        return gs_clf
 
 
 class SimpleQuestionClassifier(QuestionClassifier):
@@ -139,6 +141,7 @@ class SimpleQuestionClassifier(QuestionClassifier):
                 train_data.append(question.strip())
                 target_data.append(label.strip().split(":")[0])  # main
         return train_data, target_data
+
 
 if __name__ == "__main__":
     from little_questions.classifiers import QuestionClassifier

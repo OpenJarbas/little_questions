@@ -1,10 +1,6 @@
 from sklearn.svm import SVC, LinearSVC
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer, SimpleQuestionClassifier
-from sklearn.feature_extraction import DictVectorizer
+from little_questions.classifiers import QuestionClassifier,  \
+    SimpleQuestionClassifier
 
 
 class SVCQuestionClassifier(QuestionClassifier):
@@ -12,16 +8,8 @@ class SVCQuestionClassifier(QuestionClassifier):
         super().__init__(name)
 
     @property
-    def pipeline(self):
-        return [
-            ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
-            ('clf', SVC(kernel='poly'))
-        ]
+    def classifier_class(self):
+        return SVC(kernel='poly')
 
     @property
     def parameters(self):
@@ -45,16 +33,8 @@ class LinearSVCQuestionClassifier(QuestionClassifier):
         super().__init__(name)
 
     @property
-    def pipeline(self):
-        return [
-            ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
-            ('clf', LinearSVC())
-        ]
+    def classifier_class(self):
+        return LinearSVC()
 
     @property
     def parameters(self):

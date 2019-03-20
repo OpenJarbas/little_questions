@@ -1,36 +1,27 @@
-from sklearn.linear_model import LogisticRegression
-from little_questions.classifiers import QuestionClassifier, \
+from sklearn.linear_model import PassiveAggressiveClassifier
+from little_questions.classifiers import QuestionClassifier,  \
     SimpleQuestionClassifier
 
 
-class LogRegQuestionClassifier(QuestionClassifier):
-    def __init__(self):
-        super().__init__("logreg")
+class PassiveAggressiveQuestionClassifier(QuestionClassifier):
+    def __init__(self, name="passive_agressive"):
+        super().__init__(name)
 
     @property
     def classifier_class(self):
-        return LogisticRegression(multi_class="multinomial",
-                                  solver="lbfgs")
-
-    @property
-    def parameters(self):
-        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__text__tfidf__use_idf': (True, False),
-                'clf__warm_start': (True, False),
-                'clf__solver': (
-                    'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+        return PassiveAggressiveClassifier(loss="hinge")
 
 
-class SimpleLogRegQuestionClassifier(LogRegQuestionClassifier,
-                                     SimpleQuestionClassifier):
-    def __init__(self, name="logreg_main"):
+class SimplePassiveAggressiveQuestionClassifier(
+    PassiveAggressiveQuestionClassifier, SimpleQuestionClassifier):
+    def __init__(self, name="passive_agressive_main"):
         super().__init__(name)
 
 
 if __name__ == '__main__':
-    train = False
+    train = True
     search = False
-    clf = LogRegQuestionClassifier()
+    clf = SimplePassiveAggressiveQuestionClassifier()
     if search:
         t, tt = clf.load_data()
         clf.grid_search(t, tt)
@@ -42,9 +33,7 @@ if __name__ == '__main__':
     else:
         clf.load()
     # model performance
-    # Accuracy: 0.7 - normalize + dict + count + tfidf
-    # Accuracy: 0.684 - dict + count + tfidf
-    # Accuracy: 0.678 - count + tfidf
+    # Accuracy: Accuracy: Accuracy: 0.792
     clf.evaluate_model()
 
     # visual inspection

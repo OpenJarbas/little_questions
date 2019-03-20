@@ -166,23 +166,33 @@ speed/memory/performance trade offs and decide which classifier is best for you
 
 Classification of main label
 
+* Passive Agressive - Accuracy: 0.878
 * Linear SVC - Accuracy: 0.868
+* Ridge - Accuracy: 0.868
 * Gradient Boosting - Accuracy: 0.858
+* Perceptron - Accuracy: 0.856
 * Random Forest - Accuracy: 0.85
 * Logistic Regression - Accuracy: 0.85
 * SGD - Accuracy: 0.826
+* Decision Tree - Accuracy: 0.792
 * Naive Bayes - Accuracy: 0.782
+* Extra Tree - Accuracy: 0.768
 
 Classification of main + secondary label
 
+* Passive Agressive - Accuracy: 0.792
 * Gradient Boosting - Accuracy: 0.786
 * Linear SVC - Accuracy: 0.782
+* Ridge - Accuracy: 0.768
 * SGD - Accuracy: 0.752 
 * Random Forest - Accuracy: 0.75
+* Perceptron - Accuracy: 0.728
+* Decision Tree - Accuracy: 0.7
 * Logistic Regression - Accuracy: 0.7
+* ExtraTree - Accuracy: 0.654
 * Naive Bayes - Accuracy: 0.518
 
-NOTE: random forest models are almost 400MB, and not included in this repo
+
 
 Best accuracy model will always be used for DEFAULT_CLASSIFIER
 
@@ -204,7 +214,13 @@ assert preds[0] == "HUM"
 
 You can also test specific classifiers
 
+NOTE: the number of bundled trained models will eventually be pruned and 
+moved elsewhere
+
 ```python
+from little_questions.classifiers.passive_agressive import PassiveAggressiveQuestionClassifier
+classifier = PassiveAggressiveQuestionClassifier().load()
+
 from little_questions.classifiers.gradboost import GradientBoostingQuestionClassifier
 classifier = GradientBoostingQuestionClassifier().load()
 
@@ -214,19 +230,28 @@ classifier = SVCQuestionClassifier().load()
 from little_questions.classifiers.logreg import LogRegQuestionClassifier
 classifier = LogRegQuestionClassifier().load()
 
+from little_questions.classifiers.ridge import RidgeQuestionClassifier
+classifier = RidgeQuestionClassifier().load()
+
 from little_questions.classifiers.sgd import SGDQuestionClassifier
 classifier = SGDQuestionClassifier().load()
 
 from little_questions.classifiers.forest import ForestQuestionClassifier
-# train the model
+# NOTE: random forest models are almost 400MB, and not included in this repo
 train = True
-clf = ForestQuestionClassifier()
+classifier = ForestQuestionClassifier()
 if train:
-    t, tt = clf.load_data()
-    clf.train(t, tt)
-    clf.save()
+    t, tt = classifier.load_data()
+    classifier.train(t, tt)
+    classifier.save()
 else:
-    clf.load()
+    classifier.load()
+    
+from little_questions.classifiers.tree import TreeQuestionClassifier
+classifier = TreeQuestionClassifier().load()
+
+from little_questions.classifiers.perceptron import PerceptronQuestionClassifier
+classifier = PerceptronQuestionClassifier().load()
 
 from little_questions.classifiers.naive import NaiveQuestionClassifier
 classifier = NaiveQuestionClassifier().load()

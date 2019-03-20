@@ -1,28 +1,15 @@
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer, SimpleQuestionClassifier
-from sklearn.feature_extraction import DictVectorizer
+from little_questions.classifiers import QuestionClassifier, \
+    SimpleQuestionClassifier
 
 
 class NaiveQuestionClassifier(QuestionClassifier):
     def __init__(self):
         super().__init__("naive")
 
-
     @property
-    def pipeline(self):
-        return [
-            ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
-            ('clf', MultinomialNB())
-        ]
+    def classifier_class(self):
+        return MultinomialNB()
 
     @property
     def parameters(self):
@@ -31,7 +18,8 @@ class NaiveQuestionClassifier(QuestionClassifier):
                 'clf__fit_prior': (True, False)}
 
 
-class SimpleNaiveQuestionClassifier(NaiveQuestionClassifier):
+class SimpleNaiveQuestionClassifier(NaiveQuestionClassifier,
+                                    SimpleQuestionClassifier):
     def __init__(self, name="naive_main"):
         super().__init__(name)
 

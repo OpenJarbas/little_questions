@@ -1,10 +1,6 @@
 from sklearn.linear_model import SGDClassifier
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from little_questions.classifiers import QuestionClassifier, DictTransformer, \
-    TextTransformer, SimpleQuestionClassifier
-from sklearn.feature_extraction import DictVectorizer
+from little_questions.classifiers import QuestionClassifier,  \
+    SimpleQuestionClassifier
 
 
 class SGDQuestionClassifier(QuestionClassifier):
@@ -12,17 +8,9 @@ class SGDQuestionClassifier(QuestionClassifier):
         super().__init__("sgd")
 
     @property
-    def pipeline(self):
-        return [
-            ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
-            ('clf', SGDClassifier(loss='hinge', penalty='l2',
-              alpha=1e-3, n_iter=5, random_state=42))
-        ]
+    def classifier_class(self):
+        return SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,
+                             n_iter=5, random_state=42)
 
     @property
     def parameters(self):
@@ -38,9 +26,11 @@ class SGDQuestionClassifier(QuestionClassifier):
                 'clf__fit_intercept': (True, False)}
 
 
-class SimpleSGDQuestionClassifier(SGDQuestionClassifier, SimpleQuestionClassifier):
+class SimpleSGDQuestionClassifier(SGDQuestionClassifier,
+                                  SimpleQuestionClassifier):
     def __init__(self, name="sgd_main"):
         super().__init__(name)
+
 
 if __name__ == '__main__':
     train = True
