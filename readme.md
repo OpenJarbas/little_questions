@@ -5,15 +5,131 @@ Classify and Parse questions
 A decent question answering system needs to know what users are talking about
 
 - [Little Questions](#little-questions)
+  * [Classification](#classification)
+    + [Models](#models)
   * [Question Intent](#question-intent)
     + [Regex Parsing](#regex-parsing)
       - [Sample output](#sample-output)
     + [Neural Parsing](#neural-parsing)
       - [Output Comparison](#output-comparison)
-  * [Classification](#classification)
-    + [Models](#models)
+ 
     
+## Classification
+
+Training classifiers with [this data](http://cogcomp.org/Data/QA/QC/)
+
+There are 6 main labels
+
+* ABBR - answer is an abbreviation
+* DESC - answer is a description of something
+* ENTY - answer is an entity/thing
+* HUM - answer is a human
+* LOC - answer is a location
+* NUM - answer is numeric
+
+Still experimenting and fine tuning parameters and features, consider this 
+unstable
+
+Best accuracy model will always be used for DEFAULT_CLASSIFIER
+
+```python
+from little_questions.classifiers import QuestionClassifier
+from little_questions.classifiers import SimpleQuestionClassifier
+
+classifier = QuestionClassifier().load()
+question = "who made you"
+preds = classifier.predict([question])
+assert preds[0] == "HUM:ind"
+
+classifier = SimpleQuestionClassifier().load()
+question = "who made you"
+preds = classifier.predict([question])
+assert preds[0] == "HUM"
+
+```
+
+### Models
+
+My aim is to have the best model for each algorithm as a baseline, no 
+assumption is made about real world usage, you need to consider 
+speed/memory/performance trade offs and decide which classifier is best for you
+
+Classification of main label
+
+* Passive Agressive - Accuracy: 0.878
+* Linear SVC - Accuracy: 0.868
+* Ridge - Accuracy: 0.868
+* Gradient Boosting - Accuracy: 0.858
+* Perceptron - Accuracy: 0.856
+* Random Forest - Accuracy: 0.85
+* Logistic Regression - Accuracy: 0.85
+* SGD - Accuracy: 0.826
+* Decision Tree - Accuracy: 0.792
+* Naive Bayes - Accuracy: 0.782
+* Extra Tree - Accuracy: 0.768
+
+Classification of main + secondary label
+
+* Passive Agressive - Accuracy: 0.792
+* Gradient Boosting - Accuracy: 0.786
+* Linear SVC - Accuracy: 0.782
+* Ridge - Accuracy: 0.768
+* SGD - Accuracy: 0.752 
+* Random Forest - Accuracy: 0.75
+* Perceptron - Accuracy: 0.728
+* Decision Tree - Accuracy: 0.7
+* Logistic Regression - Accuracy: 0.7
+* ExtraTree - Accuracy: 0.654
+* Naive Bayes - Accuracy: 0.518
+
+You can also test specific classifiers
+
+NOTE: the number of bundled trained models will eventually be pruned and 
+moved elsewhere
+
+```python
+from little_questions.classifiers.passive_agressive import PassiveAggressiveQuestionClassifier
+classifier = PassiveAggressiveQuestionClassifier().load()
+
+from little_questions.classifiers.gradboost import GradientBoostingQuestionClassifier
+classifier = GradientBoostingQuestionClassifier().load()
+
+from little_questions.classifiers.svm import SVCQuestionClassifier
+classifier = SVCQuestionClassifier().load()
+
+from little_questions.classifiers.logreg import LogRegQuestionClassifier
+classifier = LogRegQuestionClassifier().load()
+
+from little_questions.classifiers.ridge import RidgeQuestionClassifier
+classifier = RidgeQuestionClassifier().load()
+
+from little_questions.classifiers.sgd import SGDQuestionClassifier
+classifier = SGDQuestionClassifier().load()
+
+from little_questions.classifiers.forest import ForestQuestionClassifier
+# NOTE: random forest models are almost 400MB, and not included in this repo
+train = True
+classifier = ForestQuestionClassifier()
+if train:
+    t, tt = classifier.load_data()
+    classifier.train(t, tt)
+    classifier.save()
+else:
+    classifier.load()
     
+from little_questions.classifiers.tree import TreeQuestionClassifier
+classifier = TreeQuestionClassifier().load()
+
+from little_questions.classifiers.perceptron import PerceptronQuestionClassifier
+classifier = PerceptronQuestionClassifier().load()
+
+from little_questions.classifiers.naive import NaiveQuestionClassifier
+classifier = NaiveQuestionClassifier().load()
+
+
+```
+
+
 ## Question Intent
 
 Questions Intents are extracted according to rules
@@ -441,121 +557,3 @@ Here is a comparison of questions were both parsers disagree
     Neural Intent: relate_to_entity
     Neural Data: {'thing': 'the film The Day of the Jackal', 'conf': 1.0, 'entity': 'portrayed the title character'}
     ___
-
-## Classification
-
-Training classifiers with [this data](http://cogcomp.org/Data/QA/QC/)
-
-There are 6 main labels
-
-* ABBR - answer is an abbreviation
-* DESC - answer is a description of something
-* ENTY - answer is an entity/thing
-* HUM - answer is a human
-* LOC - answer is a location
-* NUM - answer is numeric
-
-### Models
-
-Still experimenting and fine tuning parameters and features, consider this 
-unstable
-
-My aim is to have the best model for each algorithm as a baseline, no 
-assumption is made about real world usage, you need to consider 
-speed/memory/performance trade offs and decide which classifier is best for you
-
-Classification of main label
-
-* Passive Agressive - Accuracy: 0.878
-* Linear SVC - Accuracy: 0.868
-* Ridge - Accuracy: 0.868
-* Gradient Boosting - Accuracy: 0.858
-* Perceptron - Accuracy: 0.856
-* Random Forest - Accuracy: 0.85
-* Logistic Regression - Accuracy: 0.85
-* SGD - Accuracy: 0.826
-* Decision Tree - Accuracy: 0.792
-* Naive Bayes - Accuracy: 0.782
-* Extra Tree - Accuracy: 0.768
-
-Classification of main + secondary label
-
-* Passive Agressive - Accuracy: 0.792
-* Gradient Boosting - Accuracy: 0.786
-* Linear SVC - Accuracy: 0.782
-* Ridge - Accuracy: 0.768
-* SGD - Accuracy: 0.752 
-* Random Forest - Accuracy: 0.75
-* Perceptron - Accuracy: 0.728
-* Decision Tree - Accuracy: 0.7
-* Logistic Regression - Accuracy: 0.7
-* ExtraTree - Accuracy: 0.654
-* Naive Bayes - Accuracy: 0.518
-
-
-
-Best accuracy model will always be used for DEFAULT_CLASSIFIER
-
-```python
-from little_questions.classifiers import QuestionClassifier
-from little_questions.classifiers import SimpleQuestionClassifier
-
-classifier = QuestionClassifier().load()
-question = "who made you"
-preds = classifier.predict([question])
-assert preds[0] == "HUM:ind"
-
-classifier = SimpleQuestionClassifier().load()
-question = "who made you"
-preds = classifier.predict([question])
-assert preds[0] == "HUM"
-
-```
-
-You can also test specific classifiers
-
-NOTE: the number of bundled trained models will eventually be pruned and 
-moved elsewhere
-
-```python
-from little_questions.classifiers.passive_agressive import PassiveAggressiveQuestionClassifier
-classifier = PassiveAggressiveQuestionClassifier().load()
-
-from little_questions.classifiers.gradboost import GradientBoostingQuestionClassifier
-classifier = GradientBoostingQuestionClassifier().load()
-
-from little_questions.classifiers.svm import SVCQuestionClassifier
-classifier = SVCQuestionClassifier().load()
-
-from little_questions.classifiers.logreg import LogRegQuestionClassifier
-classifier = LogRegQuestionClassifier().load()
-
-from little_questions.classifiers.ridge import RidgeQuestionClassifier
-classifier = RidgeQuestionClassifier().load()
-
-from little_questions.classifiers.sgd import SGDQuestionClassifier
-classifier = SGDQuestionClassifier().load()
-
-from little_questions.classifiers.forest import ForestQuestionClassifier
-# NOTE: random forest models are almost 400MB, and not included in this repo
-train = True
-classifier = ForestQuestionClassifier()
-if train:
-    t, tt = classifier.load_data()
-    classifier.train(t, tt)
-    classifier.save()
-else:
-    classifier.load()
-    
-from little_questions.classifiers.tree import TreeQuestionClassifier
-classifier = TreeQuestionClassifier().load()
-
-from little_questions.classifiers.perceptron import PerceptronQuestionClassifier
-classifier = PerceptronQuestionClassifier().load()
-
-from little_questions.classifiers.naive import NaiveQuestionClassifier
-classifier = NaiveQuestionClassifier().load()
-
-
-```
-
