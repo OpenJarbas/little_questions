@@ -2,9 +2,14 @@ from little_questions.settings import DATA_PATH
 from os.path import join
 import random
 
+SAMPLE_QUESTIONS = []
 
 with open(join(DATA_PATH, "questions.txt")) as f:
-    SAMPLE_QUESTIONS = f.readlines()
+    for q in f.readlines():
+        SAMPLE_QUESTIONS.append(" ".join(q.split(" ")[1:]))
+with open(join(DATA_PATH, "questions_test.txt")) as f:
+    for q in f.readlines():
+        SAMPLE_QUESTIONS.append(" ".join(q.split(" ")[1:]))
 
 
 def random_question():

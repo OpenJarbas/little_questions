@@ -14,7 +14,7 @@ extra_files = package_files('little_questions')
 
 setup(
     name='little_questions',
-    version='0.3.2',
+    version='0.3.3',
     packages=['little_questions', 'little_questions.data',
               'little_questions.utils', 'little_questions.parsers',
               'little_questions.classifiers'],
