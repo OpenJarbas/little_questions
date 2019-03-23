@@ -5,6 +5,7 @@ Classify and Parse questions
 A decent question answering system needs to know what users are talking about
 
 - [Little Questions](#little-questions)
+  * [Install](#install)
   * [Classification](#classification)
     + [Models](#models)
   * [Question Intent](#question-intent)
@@ -13,6 +14,17 @@ A decent question answering system needs to know what users are talking about
     + [Neural Parsing](#neural-parsing)
       - [Output Comparison](#output-comparison)
  
+## Install
+
+Available on pip
+
+    pip install little_questions
+    
+from source
+
+    git clone https://github.com/JarbasAl/little_questions
+    cd little_questions
+    pip install .
     
 ## Classification
 
