@@ -1,6 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from little_questions.classifiers import QuestionClassifier, \
-    SimpleQuestionClassifier
+    SimpleQuestionClassifier, SentenceClassifier
 
 
 class LogRegQuestionClassifier(QuestionClassifier):
@@ -27,10 +27,27 @@ class SimpleLogRegQuestionClassifier(LogRegQuestionClassifier,
         super().__init__(name)
 
 
+class LogRegSentenceClassifier(SentenceClassifier):
+    def __init__(self):
+        super().__init__("logreg_sentence")
+
+    @property
+    def classifier_class(self):
+        return LogisticRegression(multi_class="multinomial", solver="lbfgs")
+
+    @property
+    def parameters(self):
+        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
+                'features__text__tfidf__use_idf': (True, False),
+                'clf__warm_start': (True, False),
+                'clf__solver': (
+                    'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+
+
 if __name__ == '__main__':
-    train = False
+    train = True
     search = False
-    clf = LogRegQuestionClassifier()
+    clf = LogRegSentenceClassifier()
     if search:
         t, tt = clf.load_data()
         clf.grid_search(t, tt)

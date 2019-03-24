@@ -16,3 +16,4 @@ RESOURCES_PATH = join(dirname(__file__), "res")
 
 DEFAULT_CLASSIFIER = "passive_agressive_model.pkl"
 DEFAULT_SIMPLE_CLASSIFIER = "passive_agressive_main_model.pkl"
+DEFAULT_SENTENCE_CLASSIFIER = "logreg_sentence_model.pkl"
