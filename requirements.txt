@@ -1,5 +1,7 @@
 numpy
 scikit-learn
-spacy
 padaos
-#gensim
+gensim
+nltk
+simple_NER
+text_classifikation

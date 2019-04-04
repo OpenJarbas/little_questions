@@ -1,54 +1,50 @@
-from sklearn.ensemble import RandomForestClassifier
-from little_questions.classifiers import QuestionClassifier,  \
-    SimpleQuestionClassifier
+from little_questions.settings import DATA_PATH
+from little_questions.classifiers import QuestionClassifier, \
+    MainQuestionClassifier, SentenceClassifier, best_pipeline
+from text_classifikation.classifiers.forest import ForestTextClassifier
+from os.path import join
 
 
-class ForestQuestionClassifier(QuestionClassifier):
-    def __init__(self, name="forest"):
-        super().__init__(name)
-
-    @property
-    def classifier_class(self):
-        return RandomForestClassifier(n_estimators=200, random_state=42)
+class ForestQuestionClassifier(QuestionClassifier, ForestTextClassifier):
+    pass
 
 
-class SimpleForestQuestionClassifier(ForestQuestionClassifier,
-                                     SimpleQuestionClassifier):
-    def __init__(self, name="forest_main"):
-        super().__init__(name)
+class ForestMainQuestionClassifier(MainQuestionClassifier,
+                                     ForestTextClassifier):
+    pass
+
+
+class ForestSentenceClassifier(SentenceClassifier, ForestTextClassifier):
+    pass
 
 
 if __name__ == '__main__':
     train = True
-    clf = SimpleForestQuestionClassifier()
+    search = True
+    name = "questions_forest"
+    clf = ForestQuestionClassifier(name)
+    name = "main_questions_forest"
+    main_clf = ForestMainQuestionClassifier(name)
+    name = "sentences_forest"
+    sent_clf = ForestSentenceClassifier(name)
+    if search:
+        print("MAIN_LABEL : SECONDARY_LABEL")
+        best_score, best_pipeline = best_pipeline(clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("MAIN LABEL")
+        best_score, best_pipeline = best_pipeline(main_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("QUESTION/SENTENCE")
+        best_score, best_pipeline = best_pipeline(sent_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        exit(0)
+
+    train_data_path = join(DATA_PATH, "questions.txt")
+    test_data_path = join(DATA_PATH, "questions_test.txt")
     if train:
-        t, tt = clf.load_data()
-        clf.train(t, tt)
+        t, t_label = clf.load_data(train_data_path)
+        clf.train(t, t_label)
         clf.save()
     else:
         clf.load()
-    clf.evaluate_model()
-    questions = ["what do dogs and cats have in common",
-                 "tell me about evil",
-                 "how to kill animals ( a cow ) and make meat",
-                 "what is a living being",
-                 "why are humans living beings",
-                 "give examples of animals",
-                 "what is the speed of light",
-                 "when were you born",
-                 "where do you store your data",
-                 "will you die",
-                 "have you finished booting",
-                 "should i program artificial stupidity",
-                 "who made you",
-                 "how long until sunset",
-                 "how long ago was sunrise",
-                 "how much is bitcoin worth",
-                 "which city has more people",
-                 "whose dog is this",
-                 "did you know that dogs are animals",
-                 "do you agree that dogs are animals",
-                 "what time is it?",
-                 "not a question"]
-    for q in questions:
-        print(q, clf.predict([q]))
+    clf.evaluate_model(test_data_path)

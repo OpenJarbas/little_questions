@@ -1,59 +1,50 @@
-from sklearn.ensemble import AdaBoostClassifier
+from little_questions.settings import DATA_PATH
 from little_questions.classifiers import QuestionClassifier, \
-    SimpleQuestionClassifier
+    MainQuestionClassifier, SentenceClassifier, best_pipeline
+from text_classifikation.classifiers.adaboost import AdaBoostTextClassifier
+from os.path import join
 
 
-class AdaBoostQuestionClassifier(QuestionClassifier):
-    def __init__(self, name="adaboost"):
-        super().__init__(name)
-
-    @property
-    def classifier_class(self):
-        return AdaBoostClassifier()
+class AdaBoostQuestionClassifier(QuestionClassifier, AdaBoostTextClassifier):
+    pass
 
 
-class SimpleAdaBoostQuestionClassifier(AdaBoostQuestionClassifier,
-                                       SimpleQuestionClassifier):
-    def __init__(self, name="adaboost_main"):
-        super().__init__(name)
+class AdaBoostMainQuestionClassifier(MainQuestionClassifier,
+                                     AdaBoostTextClassifier):
+    pass
+
+
+class AdaBoostSentenceClassifier(SentenceClassifier, AdaBoostTextClassifier):
+    pass
 
 
 if __name__ == '__main__':
     train = True
-    clf = AdaBoostQuestionClassifier()
+    search = True
+    name = "questions_adaboost"
+    clf = AdaBoostQuestionClassifier(name)
+    name = "main_questions_adaboost"
+    main_clf = AdaBoostMainQuestionClassifier(name)
+    name = "sentences_adaboost"
+    sent_clf = AdaBoostSentenceClassifier(name)
+    if search:
+        print("MAIN_LABEL : SECONDARY_LABEL")
+        best_score, best_pipeline = best_pipeline(clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("MAIN LABEL")
+        best_score, best_pipeline = best_pipeline(main_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("QUESTION/SENTENCE")
+        best_score, best_pipeline = best_pipeline(sent_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        exit(0)
+
+    train_data_path = join(DATA_PATH, "questions.txt")
+    test_data_path = join(DATA_PATH, "questions_test.txt")
     if train:
-        t, tt = clf.load_data()
-        clf.train(t, tt)
+        t, t_label = clf.load_data(train_data_path)
+        clf.train(t, t_label)
         clf.save()
     else:
         clf.load()
-    # model performance
-    # Accuracy: 0.2
-    clf.evaluate_model()
-
-    # visual inspection
-
-    questions = ["what do dogs and cats have in common",
-                 "tell me about evil",
-                 "how to kill animals ( a cow ) and make meat",
-                 "what is a living being",
-                 "why are humans living beings",
-                 "give examples of animals",
-                 "what is the speed of light",
-                 "when were you born",
-                 "where do you store your data",
-                 "will you die",
-                 "have you finished booting",
-                 "should i program artificial stupidity",
-                 "who made you",
-                 "how long until sunset",
-                 "how long ago was sunrise",
-                 "how much is bitcoin worth",
-                 "which city has more people",
-                 "whose dog is this",
-                 "did you know that dogs are animals",
-                 "do you agree that dogs are animals",
-                 "what time is it?",
-                 "not a question"]
-    # for q in questions:
-    #    print(q, clf.predict([q]))
+    clf.evaluate_model(test_data_path)

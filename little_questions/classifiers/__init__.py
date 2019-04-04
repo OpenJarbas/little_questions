@@ -1,132 +1,42 @@
 from os.path import join
 
-from little_questions.settings import MODELS_PATH, DATA_PATH, nlp, \
-    AFFIRMATIONS, DEFAULT_CLASSIFIER, DEFAULT_SIMPLE_CLASSIFIER, \
-    DEFAULT_SENTENCE_CLASSIFIER
-from little_questions.parsers import BasicQuestionParser
-from little_questions.classifiers.preprocess import normalize
-
-from sklearn.externals import joblib
 from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report,  \
-    confusion_matrix
 
+from text_classifikation.classifiers import BaseClassifier
+from text_classifikation.classifiers.pipelines import pipeline__text
 
-class TextTransformer:
-    def fit(self, *args, **kwargs):
-        return self
-
-    def transform(self, X, **transform_params):
-        return normalize(X, **transform_params)
-
-
-class DictTransformer:
-    """ transofmr a list of sentences into a list of dicts """
-    parser = BasicQuestionParser()
-
-    def fit(self, *args, **kwargs):
-        return self
-
-    def transform(self, X, **transform_params):
-        feats = []
-        for sent in X:
-            dict_feats = self.parser.parse(sent)
-            text = nlp(sent)
-            s_feature = {
-                'tag': "",
-                'is_wh': False,
-                'is_affirmation': False
-            }
-            for token in text:
-                if token.text.lower().startswith('wh'):
-                    s_feature['is_wh'] = True
-                if token.text.lower() in AFFIRMATIONS:
-                    s_feature['is_affirmation'] = True
-                s_feature['tag'] = token.tag_
-                break
-            s_feature.update(dict_feats)
-            feats.append(s_feature)
-
-        return feats
-
-
-class BaseClassifier(object):
-    def __init__(self, name):
-        self.name = name.replace('_model.pkl', "")
-        self.text_clf = None
-
-    def train(self, train_data, target_data):
-        self.text_clf = Pipeline(self.pipeline)
-        self.text_clf.fit(train_data, target_data)
-        return self.text_clf
-
-    @property
-    def pipeline(self):
-        return [
-            ('features', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-            ('clf', self.classifier_class)
-        ]
-
-    @property
-    def classifier_class(self):
-        raise NotImplementedError
-
-    @property
-    def parameters(self):
-        return {'features__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__tfidf__use_idf': (True, False)}
-
-    def grid_search(self, train_data, target_data):
-        self.text_clf = Pipeline(self.pipeline)
-        gs_clf = GridSearchCV(self.text_clf, self.parameters, n_jobs=-1)
-        gs_clf = gs_clf.fit(train_data, target_data)
-        print("best_score", gs_clf.best_score_)
-        print("best_params", gs_clf.best_params_)
-        return gs_clf
-
-    def predict(self, text):
-        return self.text_clf.predict(text)
-
-    def save(self, path=None):
-        path = path or join(MODELS_PATH, self.name + '_model.pkl')
-        joblib.dump(self.text_clf, path)
-
-    def load(self, path=None):
-        path = path or join(MODELS_PATH, self.name + '_model.pkl')
-        self.text_clf = joblib.load(path)
-        return self
-
-    def load_data(self, filename):
-        train_data = []
-        target_data = []
-        with open(filename, 'r') as f:
-            for line in f:
-                label = line.split(" ")[0]
-                question = " ".join(line.split(" ")[1:])
-                train_data.append(question.strip())
-                target_data.append(label.strip())
-        return train_data, target_data
-
-    def load_test_data(self, filename):
-        return self.load_data(filename)
-
-    def evaluate_model(self, path):
-        X_test, y_test = self.load_test_data(path)
-        preds = self.predict(X_test)
-        print("Accuracy:", accuracy_score(y_test, preds))
-        print(classification_report(y_test, preds))
-        return confusion_matrix(y_test, preds)
+from little_questions.settings import DATA_PATH, DEFAULT_CLASSIFIER, \
+    DEFAULT_MAIN_CLASSIFIER, DEFAULT_SENTENCE_CLASSIFIER, MODELS_PATH
+from little_questions.classifiers.pipelines import pipelines as base_pipelines, \
+    pipeline_unions as base_pipeline_unions
+from little_questions.classifiers.features import DictTransformer
 
 
 class QuestionClassifier(BaseClassifier):
 
-    def __init__(self, name=DEFAULT_CLASSIFIER):
+    def __init__(self, name=DEFAULT_CLASSIFIER, auto_load=False):
         super().__init__(name)
+        if auto_load:
+            self.load(join(MODELS_PATH, DEFAULT_CLASSIFIER))
+
+    def load(self, path=None):
+        path = path or join(MODELS_PATH, self.name + '_model.pkl')
+        super().load(path)
+
+    def save(self, path=None):
+        path = path or join(MODELS_PATH, self.name + '_model.pkl')
+        super().save(path)
+
+    def find_best_pipeline(self, train_data, target_data, test_data,
+                           test_label, pipelines=None, unions=None,
+                           outfolder=None, save_all=True,
+                           skip_existing=True, verbose=True):
+        pipelines = pipelines or base_pipelines
+        unions = unions or base_pipeline_unions
+        super().find_best_pipeline(train_data, target_data, test_data,
+                                   test_label, pipelines, unions, outfolder,
+                                   save_all, skip_existing, verbose)
 
     @property
     def parameters(self):
@@ -137,16 +47,24 @@ class QuestionClassifier(BaseClassifier):
     def pipeline(self):
         return [
             ('features', FeatureUnion([
-                ('text', Pipeline([('norm', TextTransformer()),
-                                   ('vect', CountVectorizer()),
-                                   ('tfidf', TfidfTransformer())])),
-                ('intent', Pipeline([('dict', DictTransformer()),
-                                     ('dict_vec', DictVectorizer())]))])),
+                ('text', pipeline__text),
+                ('calc_intent', Pipeline([('dict', DictTransformer()),
+                                          ('dict_vec', DictVectorizer())]))
+            ])),
             ('clf', self.classifier_class)
         ]
 
-    def load_data(self, filename=join(DATA_PATH, "questions.txt")):
-        return super().load_data(filename)
+    @staticmethod
+    def load_data(filename=join(DATA_PATH, "questions.txt")):
+        train_data = []
+        target_data = []
+        with open(filename, 'r') as f:
+            for line in f:
+                label = line.split(" ")[0]
+                question = " ".join(line.split(" ")[1:])
+                train_data.append(question.strip())
+                target_data.append(label.strip())
+        return train_data, target_data
 
     def load_test_data(self, filename=join(DATA_PATH, "questions_test.txt")):
         return self.load_data(filename)
@@ -155,8 +73,8 @@ class QuestionClassifier(BaseClassifier):
         return super().evaluate_model(path)
 
 
-class SimpleQuestionClassifier(QuestionClassifier):
-    def __init__(self, name=DEFAULT_SIMPLE_CLASSIFIER):
+class MainQuestionClassifier(QuestionClassifier):
+    def __init__(self, name=DEFAULT_MAIN_CLASSIFIER):
         super().__init__(name)
 
     def load_data(self, filename=join(DATA_PATH, "questions.txt")):
@@ -175,8 +93,17 @@ class SentenceClassifier(BaseClassifier):
     def __init__(self, name=DEFAULT_SENTENCE_CLASSIFIER):
         super().__init__(name)
 
-    def load_data(self, filename=join(DATA_PATH, "sentences.txt")):
-        return super().load_data(filename)
+    @staticmethod
+    def load_data(filename=join(DATA_PATH, "sentences.txt")):
+        train_data = []
+        target_data = []
+        with open(filename, 'r') as f:
+            for line in f:
+                label = line.split(" ")[0]
+                question = " ".join(line.split(" ")[1:])
+                train_data.append(question.strip())
+                target_data.append(label.strip())
+        return train_data, target_data
 
     def load_test_data(self, filename=join(DATA_PATH, "sentences_test.txt")):
         return self.load_data(filename)
@@ -185,16 +112,24 @@ class SentenceClassifier(BaseClassifier):
         return super().evaluate_model(path)
 
 
+def best_pipeline(clf):
+    train, train_label = clf.load_data()
+    test, test_label = clf.load_test_data()
+    best_score, best_pipelin, acs = clf.find_best_pipeline(train, train_label,
+                                                           test, test_label)
+    return best_score, best_pipelin
+
+
 if __name__ == "__main__":
     from little_questions.classifiers import QuestionClassifier
-    from little_questions.classifiers import SimpleQuestionClassifier
+    from little_questions.classifiers import MainQuestionClassifier
 
     classifier = QuestionClassifier().load()
     question = "who made you"
     preds = classifier.predict([question])
     assert preds[0] == "HUM:ind"
 
-    classifier = SimpleQuestionClassifier().load()
+    classifier = MainQuestionClassifier().load()
     question = "who made you"
     preds = classifier.predict([question])
     assert preds[0] == "HUM"

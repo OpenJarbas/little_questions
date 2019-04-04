@@ -6,20 +6,21 @@ except ImportError:
     print("pip install padatious==0.4.5")
     raise
 
-from little_questions.parsers import BasicQuestionParser
+from little_questions.parsers.rules import RegexQuestionParser
+from little_questions.settings import INTENT_CACHE_PATH
 
 
-class NeuralQuestionParser(BasicQuestionParser):
+class NeuralQuestionParser(RegexQuestionParser):
 
     def __init__(self, lang="en-us"):
-        self.container = IntentContainer('intent_cache')
+        self.container = IntentContainer(INTENT_CACHE_PATH)
         self._intents = []
         self.lang = lang
         self.register_default_intents()
         self.container.train()
 
     def parse(self, utterance):
-        data = {"Question": utterance}
+        data = super().parse(utterance)
         match = self.container.calc_intent(utterance)
         data["QuestionIntent"] = match.name
         data.update(match.matches)

@@ -1,92 +1,50 @@
-from sklearn.linear_model import LogisticRegression
+from little_questions.settings import DATA_PATH
 from little_questions.classifiers import QuestionClassifier, \
-    SimpleQuestionClassifier, SentenceClassifier
+    MainQuestionClassifier, SentenceClassifier, best_pipeline
+from text_classifikation.classifiers.logreg import LogRegTextClassifier
+from os.path import join
 
 
-class LogRegQuestionClassifier(QuestionClassifier):
-    def __init__(self):
-        super().__init__("logreg")
-
-    @property
-    def classifier_class(self):
-        return LogisticRegression(multi_class="multinomial",
-                                  solver="lbfgs")
-
-    @property
-    def parameters(self):
-        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__text__tfidf__use_idf': (True, False),
-                'clf__warm_start': (True, False),
-                'clf__solver': (
-                    'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+class LogRegQuestionClassifier(QuestionClassifier, LogRegTextClassifier):
+    pass
 
 
-class SimpleLogRegQuestionClassifier(LogRegQuestionClassifier,
-                                     SimpleQuestionClassifier):
-    def __init__(self, name="logreg_main"):
-        super().__init__(name)
+class LogRegMainQuestionClassifier(MainQuestionClassifier,
+                                   LogRegTextClassifier):
+    pass
 
 
-class LogRegSentenceClassifier(SentenceClassifier):
-    def __init__(self):
-        super().__init__("logreg_sentence")
-
-    @property
-    def classifier_class(self):
-        return LogisticRegression(multi_class="multinomial", solver="lbfgs")
-
-    @property
-    def parameters(self):
-        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__text__tfidf__use_idf': (True, False),
-                'clf__warm_start': (True, False),
-                'clf__solver': (
-                    'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga')}
+class LogRegSentenceClassifier(SentenceClassifier, LogRegTextClassifier):
+    pass
 
 
 if __name__ == '__main__':
-    train = True
-    search = False
-    clf = LogRegSentenceClassifier()
+    train = False
+    search = True
+    name = "questions_lr"
+    clf = LogRegQuestionClassifier(name)
+    name = "main_questions_lr"
+    main_clf = LogRegMainQuestionClassifier(name)
+    name = "sentences_lr"
+    sent_clf = LogRegSentenceClassifier(name)
     if search:
-        t, tt = clf.load_data()
-        clf.grid_search(t, tt)
-    if train:
-        t, tt = clf.load_data()
+        print("MAIN_LABEL : SECONDARY_LABEL")
+        best_score, best_pipeline = best_pipeline(clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("MAIN LABEL")
+        best_score, best_pipeline = best_pipeline(main_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("QUESTION/SENTENCE")
+        best_score, best_pipeline = best_pipeline(sent_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        exit(0)
 
-        clf.train(t, tt)
+    train_data_path = join(DATA_PATH, "questions.txt")
+    test_data_path = join(DATA_PATH, "questions_test.txt")
+    if train:
+        t, t_label = clf.load_data(train_data_path)
+        clf.train(t, t_label)
         clf.save()
     else:
         clf.load()
-    # model performance
-    # Accuracy: 0.7 - normalize + dict + count + tfidf
-    # Accuracy: 0.684 - dict + count + tfidf
-    # Accuracy: 0.678 - count + tfidf
-    clf.evaluate_model()
-
-    # visual inspection
-
-    questions = ["what do dogs and cats have in common",
-                 "tell me about evil",
-                 "how to kill animals ( a cow ) and make meat",
-                 "what is a living being",
-                 "why are humans living beings",
-                 "give examples of animals",
-                 "what is the speed of light",
-                 "when were you born",
-                 "where do you store your data",
-                 "will you die",
-                 "have you finished booting",
-                 "should i program artificial stupidity",
-                 "who made you",
-                 "how long until sunset",
-                 "how long ago was sunrise",
-                 "how much is bitcoin worth",
-                 "which city has more people",
-                 "whose dog is this",
-                 "did you know that dogs are animals",
-                 "do you agree that dogs are animals",
-                 "what time is it?",
-                 "not a question"]
-    # for q in questions:
-    #    print(q, clf.predict([q]))
+    print("accuracy", clf.evaluate_model(test_data_path)[0])

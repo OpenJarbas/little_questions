@@ -1,26 +1,29 @@
-from little_questions.settings import DEFAULT_CLASSIFIER
+from little_questions.settings import DEFAULT_CLASSIFIER, MODELS_PATH
 from little_questions.parsers import BasicQuestionParser
-#from little_questions.utils.word_vectors import WordTwoVec
 from little_questions.classifiers import QuestionClassifier
 import random
+from os.path import join
 
 
 class Question(object):
     parser = BasicQuestionParser()
-    vector_model = None#WordTwoVec()
-    classifier = QuestionClassifier().load()
+    #classifier = QuestionClassifier()
 
     def __init__(self, text):
         self.text = text
         self._answers = []
         self._parsed = None
-        self._classification = self.classifier.predict([text])[0]
+        #self._classification = self.classifier.predict([text])[0]
 
     @property
-    def parse_data(self):
-        return self.parse(True, True)
+    def subquestions(self):
+        return self.parser.chunk_question(self.text)
 
-    def parse(self, use_cached=False, cache=True):
+    @property
+    def intent_data(self):
+        return self.calc_intent(True, True)
+
+    def calc_intent(self, use_cached=False, cache=True):
         if use_cached and self._parsed is not None:
             return self._parsed
         s_feature = self.parser.parse(self.text)
@@ -29,21 +32,16 @@ class Question(object):
         return s_feature
 
     @property
-    def word_vector(self):
-        raise NotImplementedError("Work in Progress")
-        return self.vector_model.embed(self.text)
+    def main_type(self):
+        return #self._classification.split(":")[0]
+
+    @property
+    def secondary_type(self):
+        return #self._classification.split(":")[1]
 
     def add_answer(self, answer):
         if answer not in self._answers:
             self._answers.append(answer)
-
-    @property
-    def main_type(self):
-        return self._classification.split(":")[0]
-
-    @property
-    def secondary_type(self):
-        return self._classification.split(":")[1]
 
     @property
     def answer(self):
@@ -80,5 +78,9 @@ if __name__ == "__main__":
 
     for q in questions:
         question = Question(q)
-        pprint(question.parse_data)
-        print(question.main_type, question.secondary_type)
+        print("Q:", q)
+        print("Intent:", question.intent_data["QuestionIntent"])
+        pprint(question.intent_data["slots"])
+        print("SUB_QUESTIONS:")
+        pprint(question.subquestions)
+        #print(question.main_type, question.secondary_type)

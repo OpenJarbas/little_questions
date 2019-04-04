@@ -1,75 +1,49 @@
-from sklearn.linear_model import SGDClassifier
-from little_questions.classifiers import QuestionClassifier,  \
-    SimpleQuestionClassifier
+from little_questions.settings import DATA_PATH
+from little_questions.classifiers import QuestionClassifier, \
+    MainQuestionClassifier, SentenceClassifier, best_pipeline
+from text_classifikation.classifiers.sgd import SGDTextClassifier
+from os.path import join
 
 
-class SGDQuestionClassifier(QuestionClassifier):
-    def __init__(self):
-        super().__init__("sgd")
-
-    @property
-    def classifier_class(self):
-        return SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,
-                             n_iter=5, random_state=42)
-
-    @property
-    def parameters(self):
-        return {'features__text__vect__ngram_range': [(1, 1), (1, 2), (1, 3)],
-                'features__text__tfidf__use_idf': (True, False),
-                'clf__early_stopping': (True, False),
-                'clf__shuffle': (True, False),
-                'clf__learning_rate': ('constant', 'optimal', 'adaptive',
-                                       'invscaling'),
-                'clf__penalty': ('l1', 'l2', 'elasticnet'),
-                'clf__loss': ('hinge', 'log', 'modified_huber',
-                              'squared_hinge', 'perceptron'),
-                'clf__fit_intercept': (True, False)}
+class SGDQuestionClassifier(QuestionClassifier,  SGDTextClassifier):
+    pass
 
 
-class SimpleSGDQuestionClassifier(SGDQuestionClassifier,
-                                  SimpleQuestionClassifier):
-    def __init__(self, name="sgd_main"):
-        super().__init__(name)
+class SGDMainQuestionClassifier(MainQuestionClassifier, SGDTextClassifier):
+    pass
+
+
+class SGDSentenceClassifier(SentenceClassifier,  SGDTextClassifier):
+    pass
 
 
 if __name__ == '__main__':
     train = True
-    clf = SGDQuestionClassifier()
+    search = True
+    name = "questions_sgd"
+    clf = SGDQuestionClassifier(name)
+    name = "main_questions_sgd"
+    main_clf = SGDMainQuestionClassifier(name)
+    name = "sentences_sgd"
+    sent_clf = SGDSentenceClassifier(name)
+    if search:
+        print("MAIN_LABEL : SECONDARY_LABEL")
+        best_score, best_pipeline = best_pipeline(clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("MAIN LABEL")
+        best_score, best_pipeline = best_pipeline(main_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        print("QUESTION/SENTENCE")
+        best_score, best_pipeline = best_pipeline(sent_clf)
+        print("BEST:", best_pipeline, "ACCURACY:", best_score)
+        exit(0)
+
+    train_data_path = join(DATA_PATH, "questions.txt")
+    test_data_path = join(DATA_PATH, "questions_test.txt")
     if train:
-        t, tt = clf.load_data()
-        clf.train(t, tt)
+        t, t_label = clf.load_data(train_data_path)
+        clf.train(t, t_label)
         clf.save()
     else:
         clf.load()
-        # clf.load("/home/user/PycharmProjects/question_parser/little_questions/models/logreg_no_dict_model.pkl")
-    # model performance
-    # Accuracy: 0.752 - normalize + dict + count + tfidf
-    # Accuracy: 0.744 - count + tfidf
-    clf.evaluate_model()
-
-    # visual inspection
-
-    questions = ["what do dogs and cats have in common",
-                 "tell me about evil",
-                 "how to kill animals ( a cow ) and make meat",
-                 "what is a living being",
-                 "why are humans living beings",
-                 "give examples of animals",
-                 "what is the speed of light",
-                 "when were you born",
-                 "where do you store your data",
-                 "will you die",
-                 "have you finished booting",
-                 "should i program artificial stupidity",
-                 "who made you",
-                 "how long until sunset",
-                 "how long ago was sunrise",
-                 "how much is bitcoin worth",
-                 "which city has more people",
-                 "whose dog is this",
-                 "did you know that dogs are animals",
-                 "do you agree that dogs are animals",
-                 "what time is it?",
-                 "not a question"]
-    # for q in questions:
-    #    print(q, clf.predict([q]))
+    clf.evaluate_model(test_data_path)
