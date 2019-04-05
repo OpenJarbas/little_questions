@@ -1,28 +1,44 @@
-from little_questions import Question, Command
+from little_questions import Question, Sentence, Statement, Command, \
+    Exclamation, Request
 from pprint import pprint
+
+text = "Could you pass me the salt please?"
+sentence = Sentence(text)
+
+assert isinstance(sentence, Command)
+assert isinstance(sentence, Request)
+
+assert not sentence.is_question
+assert sentence.is_command
+assert not sentence.is_statement
+assert sentence.is_request
+assert not sentence.is_exclamation
 
 text = "I like pizza"
 
-sentence = Command(text)
+sentence = Sentence(text)
 
 assert not sentence.is_question
 assert not sentence.is_command
 assert sentence.is_statement
+assert isinstance(sentence, Statement)
 
 text = "Open the pod bay doors"
 
-sentence = Command(text)
-
+sentence = Sentence(text)
+pprint(sentence.score)
 assert not sentence.is_question
-try:
-    assert sentence.is_command  # SHOULD BE TRUE but isn't
-    assert not sentence.is_statement
-except:
-    print("command vs statement needs work!")
+assert sentence.is_command
+assert not sentence.is_statement
+assert isinstance(sentence, Command)
+
+text = "What a nice dog you have there!"
+sentence = Sentence(text)
+assert isinstance(sentence, Exclamation)
 
 text = "I want you to buy bitcoin"
 
-sentence = Command(text)
+sentence = Sentence(text)
 
 assert not sentence.is_question
 assert sentence.is_statement
@@ -40,7 +56,7 @@ assert sentence.sub_steps == [{'action': 'want',
 
 text = "Portugal once split the world in half with Spain"
 
-sentence = Command(text)
+sentence = Sentence(text)
 
 assert sentence.topics["location"] == True
 
@@ -63,7 +79,7 @@ text = "who made you"
 question = Question(text)
 
 assert question.is_question
-assert isinstance(question, Command)
+assert isinstance(question, Sentence)
 assert question.pretty_label == "individual (Human)"
 assert question.main_type == "HUM"
 assert question.secondary_type == "ind"

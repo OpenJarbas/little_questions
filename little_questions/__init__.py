@@ -1,55 +1,63 @@
-from little_questions.settings import DEFAULT_CLASSIFIER, MODELS_PATH,\
+from little_questions.settings import DEFAULT_CLASSIFIER, MODELS_PATH, \
     AFFIRMATIONS
 from little_questions.parsers import BasicQuestionParser, SlotParser, \
-    QuestionChunker
+    QuestionChunker, SentenceScorer
 from little_questions.parsers.neural import NeuralQuestionParser
-from little_questions.classifiers import QuestionClassifier, SentenceClassifier
+from little_questions.classifiers import QuestionClassifier
+from nltk import word_tokenize, pos_tag
 
 
-class Command(object):
-    sentence_classifier = SentenceClassifier()
+class Sentence(object):
+    sentence_classifier = SentenceScorer()
 
     def __init__(self, text):
         self._text = text
-        self._sent_classification = self.sentence_classifier.predict([text])[0]
+        self._sent_classification = self.sentence_classifier.predict(text)
+        if self._sent_classification == "command":
+            self.__class__ = Command
+        elif self._sent_classification == "question":
+            self.__class__ = Question
+        elif self._sent_classification == "exclamation":
+            self.__class__ = Exclamation
+        elif self._sent_classification == "statement":
+            self.__class__ = Statement
+        elif self._sent_classification == "request":
+            self.__class__ = Request
 
     @property
     def text(self):
         return self._text
 
     @property
+    def score(self):
+        return self.sentence_classifier.score(self.text)
+
+    @property
+    def pos_tag(self):
+        return pos_tag(word_tokenize(self.text))
+
+    @property
+    def is_exclamation(self):
+        return isinstance(self, Exclamation)
+
+    @property
+    def is_request(self):
+        return isinstance(self, Request)
+
+    @property
     def is_statement(self):
-        return not self.is_command and not self.is_question
+        return isinstance(self, Statement)
 
     @property
     def is_command(self):
-        # TODO detect imperative
-        return self._sent_classification == "command"
+        return isinstance(self, Command)
 
     @property
     def is_question(self):
-        valid_starts = ["how", "why", "when", "who", "where", "which", "what",
-                        "whose"] + AFFIRMATIONS
-        if self.text.split(" ")[0].lower().strip() in valid_starts:
-            return True
-        starts = ["in what ", "on what ", "at what ", "in which"]
-        for s in starts:
-            if self.text.lower().startswith(s):
-                return True
-        ends = [" in what", " on what", " for what", " as what", "?"]
-        for s in ends:
-            if self.text.lower().endswith(s):
-                return True
-        return self._sent_classification == "question"
+        return isinstance(self, Question)
 
     @property
     def sentence_type(self):
-        if self.is_question:
-            return "question"
-        if self.is_command:
-            return "command"
-        if self.is_statement:
-            return "statement"
         return self._sent_classification
 
     @property
@@ -68,7 +76,7 @@ class Command(object):
         return self.text
 
 
-class Question(Command):
+class Question(Sentence):
     parser = NeuralQuestionParser()
     question_classifier = QuestionClassifier()
 
@@ -80,23 +88,23 @@ class Question(Command):
 
     @property
     def topics(self):
-        slots = super().topics
+        topcs = super().topics
         if self.main_type == "HUM":
-            slots["person"] = True
+            topcs["person"] = True
         elif self.main_type == "ENTY":
-            slots["entity"] = True
+            topcs["entity"] = True
         elif self.main_type == "NUM":
             if self.secondary_type in ["date", "period"]:
-                slots["date"] = True
+                topcs["date"] = True
             else:
-                slots["quantity"] = True
+                topcs["quantity"] = True
         elif self.main_type == "LOC":
-            slots["location"] = True
+            topcs["location"] = True
         elif self.secondary_type in ["speed", "dist", "temp", "volsize"]:
-            slots["property"] = True
+            topcs["property"] = True
         else:
-            slots["thing"] = True
-        return slots
+            topcs["thing"] = True
+        return topcs
 
     @property
     def intent_data(self):
@@ -169,6 +177,22 @@ class Question(Command):
         return pretty_sec + " (" + pretty_main + ")"
 
 
+class Command(Sentence):
+    pass
+
+
+class Request(Command):
+    pass
+
+
+class Exclamation(Sentence):
+    pass
+
+
+class Statement(Sentence):
+    pass
+
+
 if __name__ == "__main__":
     from pprint import pprint
 
@@ -223,14 +247,10 @@ if __name__ == "__main__":
 
     for q in questions:
         question = Question(q)
-        if question.is_question:
-            continue
         print("Q:", q)
-        # print("Intent:", question.intent_data["QuestionIntent"])
-        # pprint(question.entities)
-        # print("SUB_QUESTIONS:")
-        # pprint(question.sub_steps)
-        print(question.sentence_type)
-        pprint(question.topics)
-        #print( question.pretty_label)
+        print("Intent:", question.intent_data["QuestionIntent"])
+        pprint(question.entities)
+        print("SUB_QUESTIONS:")
+        pprint(question.sub_steps)
+        print(question.pretty_label)
         print("____")
