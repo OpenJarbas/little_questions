@@ -14,12 +14,14 @@ extra_files = package_files('little_questions')
 
 setup(
     name='little_questions',
-    version='0.3.3',
+    version='0.5',
     packages=['little_questions', 'little_questions.data',
               'little_questions.utils', 'little_questions.parsers',
               'little_questions.classifiers'],
     url='https://github.com/JarbasAl/little_questions',
-    install_requires=['numpy', 'scikit-learn', 'spacy', 'padaos'],
+    install_requires=['numpy', 'scikit-learn', 'gensim', 'padaos', "nltk",
+                      'simple_NER>=0.1.10', "text_classifikation",
+                      "fann2==1.0.7", "padatious>=0.4.5"],
     package_data={'': extra_files},
     include_package_data=True,
     license='MIT',

@@ -1,4 +1,4 @@
-from os.path import join
+from os.path import join, isfile
 
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction import DictVectorizer
@@ -9,20 +9,23 @@ from text_classifikation.classifiers.pipelines import pipeline__text
 from little_questions.settings import DATA_PATH, DEFAULT_CLASSIFIER, \
     DEFAULT_MAIN_CLASSIFIER, DEFAULT_SENTENCE_CLASSIFIER, MODELS_PATH
 from little_questions.classifiers.pipelines import pipelines as base_pipelines, \
-    pipeline_unions as base_pipeline_unions
+    pipeline_unions as base_pipeline_unions, default_pipeline
 from little_questions.classifiers.features import DictTransformer
 
 
 class QuestionClassifier(BaseClassifier):
 
-    def __init__(self, name=DEFAULT_CLASSIFIER, auto_load=False):
+    def __init__(self, name=DEFAULT_CLASSIFIER, auto_load=True):
         super().__init__(name)
-        if auto_load:
-            self.load(join(MODELS_PATH, DEFAULT_CLASSIFIER))
+        if auto_load and isfile(join(MODELS_PATH, name)):
+            self.load(join(MODELS_PATH, name))
+        elif auto_load and isfile(join(MODELS_PATH, name + '_model.pkl')):
+            self.load(join(MODELS_PATH, name + '_model.pkl'))
 
     def load(self, path=None):
         path = path or join(MODELS_PATH, self.name + '_model.pkl')
         super().load(path)
+        return self
 
     def save(self, path=None):
         path = path or join(MODELS_PATH, self.name + '_model.pkl')
@@ -30,7 +33,7 @@ class QuestionClassifier(BaseClassifier):
 
     def find_best_pipeline(self, train_data, target_data, test_data,
                            test_label, pipelines=None, unions=None,
-                           outfolder=None, save_all=True,
+                           outfolder=None, save_all=False,
                            skip_existing=True, verbose=True):
         pipelines = pipelines or base_pipelines
         unions = unions or base_pipeline_unions
@@ -46,11 +49,7 @@ class QuestionClassifier(BaseClassifier):
     @property
     def pipeline(self):
         return [
-            ('features', FeatureUnion([
-                ('text', pipeline__text),
-                ('calc_intent', Pipeline([('dict', DictTransformer()),
-                                          ('dict_vec', DictVectorizer())]))
-            ])),
+            ('features', default_pipeline),
             ('clf', self.classifier_class)
         ]
 
@@ -90,8 +89,20 @@ class MainQuestionClassifier(QuestionClassifier):
 
 
 class SentenceClassifier(BaseClassifier):
-    def __init__(self, name=DEFAULT_SENTENCE_CLASSIFIER):
+    def __init__(self, name=DEFAULT_SENTENCE_CLASSIFIER, auto_load=True):
         super().__init__(name)
+        if auto_load and isfile(join(MODELS_PATH, name)):
+            self.load(join(MODELS_PATH, name))
+        elif auto_load and isfile(join(MODELS_PATH, name + '_model.pkl')):
+            self.load(join(MODELS_PATH, name + '_model.pkl'))
+    
+    def load(self, path=None):
+        path = path or join(MODELS_PATH, self.name + '_model.pkl')
+        super().load(path)
+
+    def save(self, path=None):
+        path = path or join(MODELS_PATH, self.name + '_model.pkl')
+        super().save(path)
 
     @staticmethod
     def load_data(filename=join(DATA_PATH, "sentences.txt")):
@@ -124,12 +135,12 @@ if __name__ == "__main__":
     from little_questions.classifiers import QuestionClassifier
     from little_questions.classifiers import MainQuestionClassifier
 
-    classifier = QuestionClassifier().load()
+    classifier = QuestionClassifier()
     question = "who made you"
     preds = classifier.predict([question])
     assert preds[0] == "HUM:ind"
 
-    classifier = MainQuestionClassifier().load()
+    classifier = MainQuestionClassifier()
     question = "who made you"
     preds = classifier.predict([question])
     assert preds[0] == "HUM"

@@ -1,6 +1,8 @@
 numpy
 scikit-learn
 padaos
+fann2==1.0.7
+padatious>=0.4.5
 gensim
 nltk
 simple_NER

@@ -5,7 +5,7 @@ except ImportError:
     print("pip install fann2==1.0.7")
     print("pip install padatious==0.4.5")
     raise
-
+from little_questions.parsers import BasicQuestionParser
 from little_questions.parsers.rules import RegexQuestionParser
 from little_questions.settings import INTENT_CACHE_PATH
 
@@ -20,11 +20,12 @@ class NeuralQuestionParser(RegexQuestionParser):
         self.container.train()
 
     def parse(self, utterance):
-        data = super().parse(utterance)
+        data = BasicQuestionParser().parse(utterance)
         match = self.container.calc_intent(utterance)
-        data["QuestionIntent"] = match.name
-        data.update(match.matches)
-        data["conf"] = match.conf
+        if match.name:
+            data["QuestionIntent"] = match.name
+            data.update(match.matches)
+            data["conf"] = match.conf
         return data
 
 
@@ -34,12 +35,12 @@ if __name__ == "__main__":
     import random
 
     parser = NeuralQuestionParser()
-    b_parser = BasicQuestionParser()
+    b_parser = RegexQuestionParser()
 
     questions = SAMPLE_QUESTIONS
     random.shuffle(questions)
 
-    for q in questions:
+    for q in questions[:10]:
         data = parser.parse(q)
         datab = b_parser.parse(q)
         if data["QuestionIntent"] != datab["QuestionIntent"]:

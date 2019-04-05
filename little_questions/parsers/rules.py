@@ -13,6 +13,7 @@ class RegexQuestionParser(BasicQuestionParser):
     """
 
     def __init__(self, lang="en-us"):
+        super().__init__(lang)
         self.container = IntentContainer()
         self._intents = []
         self.lang = lang
@@ -59,8 +60,8 @@ class RegexQuestionParser(BasicQuestionParser):
             self.container = IntentContainer()
             self._intents = []
         for f in listdir(folder_path):
-            if f.endswith(".calc_intent"):
-                intent = f.replace(".calc_intent", "")
+            if f.endswith(".intent"):
+                intent = f.replace(".intent", "")
                 with open(join(folder_path, f)) as fi:
                     rules = fi.readlines()
                 rules = [r.strip() for r in rules if r and not r.startswith("#")]
@@ -78,12 +79,12 @@ class RegexQuestionParser(BasicQuestionParser):
         utterance = " ".join(utterance.split(" "))
 
         match = self.container.calc_intent(utterance)
-
-        data["QuestionIntent"] = match["name"] or "unknown"
-        entities = match["entities"]
-        data.update(entities)
-        if "query" in data:
-            data["query"] = self.normalize(data["query"])
+        if match.get("name"):
+            data["QuestionIntent"] = match["name"] or "unknown"
+            entities = match["entities"]
+            data.update(entities)
+            if "query" in data:
+                data["query"] = self.normalize(data["query"])
         return data
 
 
@@ -107,9 +108,6 @@ if __name__ == "__main__":
         print("Q:", q)
         print("Intent:", data['QuestionIntent'])
         pprint(data)
-        loc = parser.chunk_question(q)
-        print("Subquestions:")
-        pprint(loc)
         print("___")
 
     questions = SAMPLE_QUESTIONS
