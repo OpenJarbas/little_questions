@@ -1,4 +1,4 @@
-from simple_NER.annotators.date import DateTimeNER
+from simple_NER.annotators.datetime_ner import DateTimeNER
 from simple_NER.annotators.nltk_ner import NltkNER
 from simple_NER.annotators.keyword_ner import KeywordNER
 from little_questions.utils import normalize
@@ -6,7 +6,7 @@ from little_questions.settings import AFFIRMATIONS, ALL_POS_TAGS
 from nltk import word_tokenize, pos_tag
 
 
-class SentenceScorer(object):
+class SentenceScorer:
     @staticmethod
     def predict(text):
         score = SentenceScorer.score(text)

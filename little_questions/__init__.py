@@ -7,7 +7,7 @@ from little_questions.classifiers import QuestionClassifier
 from nltk import word_tokenize, pos_tag
 
 
-class Sentence(object):
+class Sentence:
     sentence_classifier = SentenceScorer()
 
     def __init__(self, text):

@@ -1,9 +1,11 @@
-numpy
+numpy===1.16.1
+nltk
+gensim
+wordfreq
 scikit-learn
 padaos
 fann2==1.0.7
 padatious>=0.4.5
 gensim
-nltk
-simple_NER>=0.3.0
-text_classifikation
+simple_NER>=0.6.1
+joblib
