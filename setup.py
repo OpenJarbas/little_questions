@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='little_questions',
-    version='0.7.0',
+    version='0.7.0a1',
     packages=['little_questions',
               'little_questions.classifiers',
               'little_questions.features'],

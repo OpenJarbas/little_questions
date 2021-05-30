@@ -3,10 +3,10 @@ from sklearn.feature_extraction import DictVectorizer
 import nltk
 from little_questions.features.preprocess import normalize
 
-
-nltk.download('maxent_ne_chunker', quiet=True)
-nltk.download('words', quiet=True)
-
+#
+#nltk.download('maxent_ne_chunker', quiet=True)
+#nltk.download('words', quiet=True)
+#
 
 class LemmatizerTransformer(BaseEstimator, TransformerMixin):
     def fit(self, *args, **kwargs):

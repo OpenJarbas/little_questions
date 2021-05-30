@@ -50,8 +50,8 @@ question = Sentence(text)
 assert question.is_question
 assert isinstance(question, Question)
 assert question.pretty_label == "individual (Human)"
-assert question.main_type == "HUM"
-assert question.secondary_type == "ind"
+assert question.main_label == "HUM"
+assert question.secondary_label == "ind"
 
 text = "when will the world end"
 question = Question(text)

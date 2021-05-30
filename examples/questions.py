@@ -5,6 +5,7 @@ from pprint import pprint
 text = "Could you pass me the salt please?"
 sentence = Sentence(text)
 
+assert isinstance(sentence, str)
 assert isinstance(sentence, Command)
 assert isinstance(sentence, Request)
 
@@ -50,8 +51,8 @@ question = Question(text)
 assert question.is_question
 assert isinstance(question, Sentence)
 assert question.pretty_label == "individual (Human)"
-assert question.main_type == "HUM"
-assert question.secondary_type == "ind"
+assert question.main_label == "HUM"
+assert question.secondary_label == "ind"
 
 text = "when will the world end"
 question = Question(text)

@@ -4,91 +4,120 @@ from little_questions.classifiers import QuestionClassifier, SentenceScorer
 from nltk import word_tokenize, pos_tag
 
 
+class Sentence(str):
+    sentence_classifier = None
+    question_classifier = None
 
-class Sentence:
-    sentence_classifier = SentenceScorer()
-    question_classifier = QuestionClassifier()
+    def __new__(cls, content):
+        # lazy load
+        if cls.sentence_classifier is None:
+            cls.sentence_classifier = SentenceScorer()
+        if cls.question_classifier is None:
+            cls.question_classifier = QuestionClassifier()
+        # classify
+        sent_classification = cls.sentence_classifier.predict(content)
+        classification = cls.question_classifier.predict([content])[0]
+        # change base class
+        if sent_classification == "command":
+            obj = super(Sentence, Command).__new__(Command, content)
+        elif sent_classification == "question":
+            obj = super(Sentence, Question).__new__(Question, content)
+        elif sent_classification == "exclamation":
+            obj = super(Sentence, Exclamation).__new__(Exclamation, content)
+        elif sent_classification == "statement":
+            obj = super(Sentence, Statement).__new__(Statement, content)
+        elif sent_classification == "request":
+            obj = super(Sentence, Request).__new__(Request, content)
+        else:
+            obj = super(Sentence, cls).__new__(cls, content)
+        # add new properties
+        obj.classification = classification
+        obj._sent_classification = sent_classification
+        obj._sent_scores = cls.sentence_classifier.score(content)
+        return obj
 
-    def __init__(self, text):
-        self._text = text
-        self._sent_classification = self.sentence_classifier.predict(text)
-        self._classification = self.question_classifier.predict([text])[0]
-        if self._sent_classification == "command":
-            self.__class__ = Command
-        elif self._sent_classification == "question":
-            self.__class__ = Question
-        elif self._sent_classification == "exclamation":
-            self.__class__ = Exclamation
-        elif self._sent_classification == "statement":
-            self.__class__ = Statement
-        elif self._sent_classification == "request":
-            self.__class__ = Request
+    def __getattribute__(self, name):
+        if name in dir(str):  # only handle str methods here
+            def method(self, *args, **kwargs):
+                value = getattr(super(), name)(*args, **kwargs)
+                # not every string method returns a str:
+                if isinstance(value, str):
+                    return type(self)(value)
+                elif isinstance(value, list):
+                    return [type(self)(i) for i in value]
+                elif isinstance(value, tuple):
+                    return tuple(type(self)(i) for i in value)
+                else:  # dict, bool, or int
+                    return value
+            return method.__get__(self)  # bound method
+        else:  # delegate to parent
+            return super().__getattribute__(name)
 
     @property
-    def main_type(self):
-        return self._classification.split(":")[0]
+    def main_label(self):
+        return self.classification.split(":")[0]
 
     @property
-    def secondary_type(self):
-        return self._classification.split(":")[1]
+    def secondary_label(self):
+        return self.classification.split(":")[1]
 
     @property
     def pretty_label(self):
-        pretty_main = self.main_type
-        if self.main_type == "ENTY":
+        pretty_main = self.main_label
+        if self.main_label == "ENTY":
             pretty_main = "Entity"
-        elif self.main_type == "DESC":
+        elif self.main_label == "DESC":
             pretty_main = "Description"
-        elif self.main_type == "NUM":
+        elif self.main_label == "NUM":
             pretty_main = "Numeric"
-        elif self.main_type == "HUM":
+        elif self.main_label == "HUM":
             pretty_main = "Human"
-        elif self.main_type == "LOC":
+        elif self.main_label == "LOC":
             pretty_main = "Location"
-        elif self.main_type == "ABBR":
+        elif self.main_label == "ABBR":
             pretty_main = "Abbreviation"
 
-        pretty_sec = self.secondary_type
-        if self.secondary_type == "def":
+        pretty_sec = self.secondary_label
+        if self.secondary_label == "def":
             pretty_sec = "definition"
-        elif self.secondary_type == "desc":
+        elif self.secondary_label == "desc":
             pretty_sec = "description"
-        elif self.secondary_type == "ind":
+        elif self.secondary_label == "ind":
             pretty_sec = "individual"
-        elif self.secondary_type == "dist":
+        elif self.secondary_label == "dist":
             pretty_sec = "distance"
-        elif self.secondary_type == "volsize":
+        elif self.secondary_label == "volsize":
             pretty_sec = "volume"
-        elif self.secondary_type == "temp":
+        elif self.secondary_label == "temp":
             pretty_sec = "temperature"
-        elif self.secondary_type == "gr":
+        elif self.secondary_label == "gr":
             pretty_sec = "group or organization of persons"
-        elif self.secondary_type == "abb":
+        elif self.secondary_label == "abb":
             pretty_sec = "abbreviation"
-        elif self.secondary_type == "exp":
+        elif self.secondary_label == "exp":
             pretty_sec = "expression abbreviated"
-        elif self.secondary_type == "body":
+        elif self.secondary_label == "body":
             pretty_sec = "organs of body"
-        elif self.secondary_type == "cremat":
+        elif self.secondary_label == "cremat":
             pretty_sec = "inventions, books and other creative pieces"
-        elif self.secondary_type == "dismed":
+        elif self.secondary_label == "dismed":
             pretty_sec = "diseases and medicine"
-        elif self.secondary_type == "lang":
+        elif self.secondary_label == "lang":
             pretty_sec = "language"
-        elif self.secondary_type == "termeq":
+        elif self.secondary_label == "termeq":
             pretty_sec = "equivalent terms"
-        elif self.secondary_type == "veh":
+        elif self.secondary_label == "veh":
             pretty_sec = "vehicles"
 
         return pretty_sec + " (" + pretty_main + ")"
 
     @property
     def text(self):
-        return self._text
+        return str(self)
 
     @property
     def score(self):
-        return self.sentence_classifier.score(self.text)
+        return self._sent_scores
 
     @property
     def pos_tag(self):
@@ -117,9 +146,6 @@ class Sentence:
     @property
     def sentence_type(self):
         return self._sent_classification
-
-    def __str__(self):
-        return self.text
 
 
 class Question(Sentence):
