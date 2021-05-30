@@ -83,36 +83,48 @@ NOTE: optimal pipeline/features and hyperparameters under investigation
 You can test specific classifiers
 
 ```python
-from little_questions.classifiers.passive_agressive import PassiveAggressiveQuestionClassifier
+from little_questions.classifiers.passive_agressive import
+    PassiveAggressiveQuestionClassifier
+
 classifier = PassiveAggressiveQuestionClassifier()
 
-from little_questions.classifiers.gradboost import GradientBoostingQuestionClassifier
+from little_questions.classifiers.gradboost import
+    GradientBoostingQuestionClassifier
+
 classifier = GradientBoostingQuestionClassifier()
 
 from little_questions.classifiers.svm import SVCQuestionClassifier
+
 classifier = SVCQuestionClassifier()
 
 from little_questions.classifiers.logreg import LogRegQuestionClassifier
+
 classifier = LogRegQuestionClassifier()
 
 from little_questions.classifiers.ridge import RidgeQuestionClassifier
+
 classifier = RidgeQuestionClassifier()
 
 from little_questions.classifiers.sgd import SGDQuestionClassifier
+
 classifier = SGDQuestionClassifier()
 
 from little_questions.classifiers.forest import ForestQuestionClassifier
+
 classifier = ForestQuestionClassifier()
-    
+
 from little_questions.classifiers.tree import TreeQuestionClassifier
+
 classifier = TreeQuestionClassifier()
 
-from little_questions.classifiers.perceptron import PerceptronQuestionClassifier
+from little_questions.classifiers.perceptron import
+    PerceptronQuestionClassifier
+
 classifier = PerceptronQuestionClassifier()
 
 from little_questions.classifiers.naive import NaiveQuestionClassifier
-classifier = NaiveQuestionClassifier()
 
+classifier = NaiveQuestionClassifier()
 
 # train / load
 train = True
@@ -121,13 +133,14 @@ if train:
     classifier.train(t, tt)
     classifier.save()
 else:
-    classifier.load()
-    
+    classifier.load_from_file()
+
 # test
 X_test, y_test = classifier.load_test_data()
 preds = classifier.predict(X_test)
 
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report,
+    confusion_matrix
 
 accuracy = accuracy_score(y_test, preds)
 report = classification_report(y_test, preds)

@@ -89,10 +89,10 @@ assert data == [{'action': 'has value',
 This is an early version, rules can be found and expanded [here](little_questions/res/en-us)
 
 Questions are parsed using [Padaos](https://github.com/MycroftAI/padaos), a dead simple regex intent parser
- 
+
 ```python
 from little_questions.parsers.rules import RegexQuestionParser
-from little_questions.data import SAMPLE_QUESTIONS
+from train_scripts.data import SAMPLE_QUESTIONS
 from pprint import pprint
 import random
 
@@ -152,7 +152,7 @@ Same rules as before are used
 
 ```python
 from little_questions.parsers.neural import NeuralQuestionParser
-from little_questions.data import SAMPLE_QUESTIONS
+from train_scripts.data import SAMPLE_QUESTIONS
 from pprint import pprint
 import random
 

@@ -43,37 +43,6 @@ sentence = Sentence(text)
 assert not sentence.is_question
 assert sentence.is_statement
 
-assert sentence.sub_steps == [{'action': 'want',
-                               'object': 'self',
-                               'subintent': 'select option',
-                               'subject': 'user',
-                               'subquestion': 'select user  for  want self'},
-                              {'action': 'buy',
-                               'object': 'bitcoin',
-                               'subintent': 'select option',
-                               'subject': 'self',
-                               'subquestion': 'select self for buy bitcoin'}]
-
-text = "Portugal once split the world in half with Spain"
-
-sentence = Sentence(text)
-
-assert sentence.topics["location"] == True
-
-try:
-    assert sentence.entities == {'date': [],
-                                 'entity': [],
-                                 'location': ['Portugal', 'Spain'],
-                                 'person': [],
-                                 'property': [],
-                                 'quantity': [],
-                                 'thing': ['half', 'spain', 'world', 'split',
-                                           'portugal']}
-
-except:
-    # might fail, order of list is not guaranteed
-    # pprint(sentence.entities)
-    pass
 
 text = "who made you"
 question = Question(text)
@@ -94,50 +63,44 @@ assert question.pretty_label == "speed (Numeric)"
 
 text = "why are fire trucks red"
 question = Question(text)
+
 assert question.pretty_label == "reason (Description)"
 
-text = "Who was the first English circumnavigator of the globe"
-question = Question(text)
-assert question.intent_data == {
-    'Question': 'Who was the first English circumnavigator of the globe',
-    'QuestionIntent': 'relate_to_entity',
-    'conf': 1.0,
-    'entity': 'was the first English circumnavigator',
-    'is_affirmation': False,
-    'is_wh': True,
-    'thing': 'the globe'
-}
+questions = [
+    "what do dogs and cats have in common",
+    "tell me about evil",
+    "what is a living being",
+    "how to kill animals ( a cow ) and make meat",
+    "why are humans living beings",
+    "give examples of animals",
+    "what is the speed of light",
+    "when is your birthday",
+    "when were you born",
+    "where do you store your data",
+    "will you die",
+    "should i program artificial stupidity",
+    "who made you",
+    "how long until world war 3",
+    "how long ago was sunrise",
+    "which city has more people",
+    "did you know that dogs are animals",
+    "do you agree that dogs are animals",
+    "who made you",
+    "whose dog is this",
+    "how much is bitcoin worth",
 
-text = "When was Rosa Parks born"
-question = Question(text)
-assert question.intent_data == {
-    'Question': 'When was Rosa Parks born',
-    'QuestionIntent': 'time',
-    'conf': 1.0,
-    'is_affirmation': False,
-    'is_wh': True,
-    'thing': 'Rosa Parks born'
-}
+    "have you finished booting",
 
-text = "How many revolutions does a standard LP make in three minutes ?"
-question = Question(text)
-assert question.intent_data == {
-    'Question': 'How many revolutions does a standard LP make in three minutes ?',
-    'QuestionIntent': 'describe_attribute',
-    'conf': 1.0,
-    'is_affirmation': False,
-    'is_wh': True,
-    'property': 'many revolutions',
-    'thing': 'a standard LP make in three minutes'
-}
+    "how tall is the eiffel tower",
+    "how big is an elephant",
+    "how large is the car",
+    "how fast is a zebra",
 
-text = "How do I tie a tie ?"
-question = Question(text)
-assert question.intent_data == {
-    'Question': 'How do I tie a tie ?',
-    'QuestionIntent': 'step_by_step',
-    'conf': 1.0,
-    'is_affirmation': False,
-    'is_wh': True,
-    'query': 'I tie a tie'
-}
+    "not a question"]
+
+for q in questions:
+    question = Question(q)
+    print("Q:", q)
+    print(question.sentence_type, question.pretty_label)
+    print("____")
+
