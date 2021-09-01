@@ -1,5 +1,7 @@
-numpy===1.16.1
+numpy>=1.21.2
 nltk
 wordfreq
 scikit-learn
 joblib
+pyxdg
+JarbasModelZoo>=0.2.0a2

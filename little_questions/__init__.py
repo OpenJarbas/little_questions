@@ -1,22 +1,25 @@
-from little_questions.settings import DEFAULT_CLASSIFIER, MODELS_PATH, \
-    AFFIRMATIONS
-from little_questions.classifiers import QuestionClassifier, SentenceScorer
-from nltk import word_tokenize, pos_tag
+from little_questions.classifiers import get_classifier, get_scorer
 
 
 class Sentence(str):
-    sentence_classifier = None
-    question_classifier = None
 
-    def __new__(cls, content):
-        # lazy load
-        if cls.sentence_classifier is None:
-            cls.sentence_classifier = SentenceScorer()
-        if cls.question_classifier is None:
-            cls.question_classifier = QuestionClassifier()
+    def __new__(cls, content, model="en", scorer=None):
+
+        # lazy load classifiers
+        question_classifier = get_classifier(model_id=model)
+        if scorer is None:
+            if model.startswith("http"):
+                # TODO naming convention to extract lang
+                if "en" in model:
+                    scorer = "en"
+            else:
+                scorer = model
+        sentence_classifier = get_scorer(lang=scorer)
+
         # classify
-        sent_classification = cls.sentence_classifier.predict(content)
-        classification = cls.question_classifier.predict([content])[0]
+        classification = question_classifier.predict([content])[0]
+        sent_classification = sentence_classifier.predict(content)
+
         # change base class
         if sent_classification == "command":
             obj = super(Sentence, Command).__new__(Command, content)
@@ -30,10 +33,12 @@ class Sentence(str):
             obj = super(Sentence, Request).__new__(Request, content)
         else:
             obj = super(Sentence, cls).__new__(cls, content)
+
         # add new properties
         obj.classification = classification
-        obj._sent_classification = sent_classification
-        obj._sent_scores = cls.sentence_classifier.score(content)
+        obj.model = model
+        obj.sentence_type = sent_classification
+        obj.score = sentence_classifier.score(content)
         return obj
 
     def __getattribute__(self, name):
@@ -59,7 +64,7 @@ class Sentence(str):
 
     @property
     def secondary_label(self):
-        return self.classification.split(":")[1]
+        return self.classification.split(":")[-1]
 
     @property
     def pretty_label(self):
@@ -112,18 +117,6 @@ class Sentence(str):
         return pretty_sec + " (" + pretty_main + ")"
 
     @property
-    def text(self):
-        return str(self)
-
-    @property
-    def score(self):
-        return self._sent_scores
-
-    @property
-    def pos_tag(self):
-        return pos_tag(word_tokenize(self.text))
-
-    @property
     def is_exclamation(self):
         return isinstance(self, Exclamation)
 
@@ -142,10 +135,6 @@ class Sentence(str):
     @property
     def is_question(self):
         return isinstance(self, Question)
-
-    @property
-    def sentence_type(self):
-        return self._sent_classification
 
 
 class Question(Sentence):

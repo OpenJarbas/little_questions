@@ -1,19 +1,17 @@
-from little_questions.classifiers import QuestionClassifier
-from little_questions.classifiers import MainQuestionClassifier
+from little_questions.classifiers import get_classifier, get_scorer
 
-classifier = QuestionClassifier()
+classifier = get_classifier("en")
 question = "who made you"
 preds = classifier.predict([question])
 assert preds[0] == "HUM:ind"
 
-classifier = MainQuestionClassifier()
+classifier = get_classifier("en_small")
 question = "who made you"
 preds = classifier.predict([question])
 assert preds[0] == "HUM"
 
-import random
 
-scorer = SentenceScorer()
+scorer = get_scorer("en")
 states = ["Our dog eats any old thing.",
           "We have already won several races.",
           "The dog hasn’t been fed yet.",
@@ -54,12 +52,3 @@ for q in questions:
     print("\nQuestion:", q)
     print(scorer.predict(q))
 
-classifier = QuestionClassifier()
-question = "who made you"
-preds = classifier.predict([question])
-assert preds[0] == "HUM:ind"
-
-classifier = MainQuestionClassifier()
-question = "who made you"
-preds = classifier.predict([question])
-assert preds[0] == "HUM"

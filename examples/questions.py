@@ -3,7 +3,7 @@ from little_questions import Question, Sentence, Statement, Command, \
 from pprint import pprint
 
 text = "Could you pass me the salt please?"
-sentence = Sentence(text)
+sentence = Sentence(text, model="en_small")
 
 assert isinstance(sentence, str)
 assert isinstance(sentence, Command)
@@ -17,7 +17,7 @@ assert not sentence.is_exclamation
 
 text = "I like pizza"
 
-sentence = Sentence(text)
+sentence = Sentence(text, model="en_small")
 
 assert not sentence.is_question
 assert not sentence.is_command
@@ -26,7 +26,7 @@ assert isinstance(sentence, Statement)
 
 text = "Open the pod bay doors"
 
-sentence = Sentence(text)
+sentence = Sentence(text, model="en_small")
 pprint(sentence.score)
 assert not sentence.is_question
 assert sentence.is_command
@@ -34,12 +34,12 @@ assert not sentence.is_statement
 assert isinstance(sentence, Command)
 
 text = "What a nice dog you have there!"
-sentence = Sentence(text)
+sentence = Sentence(text, model="en_small")
 assert isinstance(sentence, Exclamation)
 
 text = "I want you to buy bitcoin"
 
-sentence = Sentence(text)
+sentence = Sentence(text, model="en_small")
 
 assert not sentence.is_question
 assert sentence.is_statement
@@ -100,7 +100,7 @@ questions = [
     "not a question"]
 
 for q in questions:
-    question = Question(q)
+    question = Question(q, model="en_small")
     print("Q:", q)
     print(question.sentence_type, question.pretty_label)
     print("____")
